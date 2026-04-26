@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Master Seeder · Interview Studio</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --border: #e5e5e3;
+    --accent: #1a1a1a;
+    --warn-bg: #fff7e6;
+    --warn-border: #ffd591;
+    --success: #2f8a4d;
+    --error: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    color: var(--ink);
+    line-height: 1.5;
+    background: var(--bg);
+  }
+  h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; margin: 0 0 12px; font-weight: 600; }
+  p { margin: 8px 0; }
+  .subtitle { color: var(--muted); margin-bottom: 32px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .warn {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+  .preview-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-row:last-child { border-bottom: none; }
+  .count { font-weight: 600; font-variant-numeric: tabular-nums; }
+  button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 8px;
+    font-family: inherit;
+  }
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+  button:hover:not(:disabled) { background: #000; }
+  input[type="file"] {
+    display: block;
+    margin: 12px 0;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  .log {
+    background: #0d1117;
+    color: #c9d1d9;
+    padding: 16px;
+    border-radius: 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    margin-top: 16px;
+    max-height: 360px;
+    overflow: auto;
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+  .log .ok { color: #7ee787; }
+  .log .err { color: #ff7b72; }
+  .log .info { color: #79c0ff; }
+  .step-num {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: 13px;
+    margin-right: 8px;
+    vertical-align: 2px;
+  }
+  .small { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<h1>Master Seeder</h1>
+<p class="subtitle">Engangs-værktøj. Pumper dine spørgsmål + standard guide og bias ind i Firestore master-biblioteket.</p>
+
+<div class="warn">
+  <strong>Du kan trygt køre den flere gange.</strong> Den overskriver eksisterende master-data hver gang (idempotent). Brug den, kør den, glem den — eller kør den igen senere hvis dit seed-data ændrer sig.
+</div>
+
+<div class="card">
+  <h2><span class="step-num">1</span>Indlæs din backup-JSON</h2>
+  <input type="file" id="jsonFile" accept=".json,application/json">
+  <p class="small" id="loadStatus">Vælg din <code>interview-studio-backup-…json</code> fil.</p>
+</div>
+
+<div class="card">
+  <h2><span class="step-num">2</span>Forhåndsvisning</h2>
+  <div class="preview-row"><span>Spørgsmål (fra dit JSON)</span><span class="count" id="qCount">—</span></div>
+  <div class="preview-row"><span>Guide (standardværdier fra appens kode)</span><span class="count" id="gCount">13</span></div>
+  <div class="preview-row"><span>Bias (standardværdier fra appens kode)</span><span class="count" id="bCount">18</span></div>
+</div>
+
+<div class="card">
+  <h2><span class="step-num">3</span>Skriv til Firestore</h2>
+  <p class="small">Skriver til <code>master/lib</code> (meta) plus tre subcollections: <code>questions</code>, <code>guide</code>, <code>bias</code>.</p>
+  <button id="seedBtn" disabled>Seed master library</button>
+  <div class="log" id="log">Klar. Vælg JSON-fil for at starte.</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getFirestore, doc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+// ─── Firebase config (offentlig — sikkert i client-kode) ─────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBPbgxc_HH-z6uoReNybEdNEQEt2GeUkwU",
+  authDomain: "interviewopus-92ed4.firebaseapp.com",
+  projectId: "interviewopus-92ed4",
+  storageBucket: "interviewopus-92ed4.firebasestorage.app",
+  messagingSenderId: "479805110021",
+  appId: "1:479805110021:web:107f1dfde5729a73a1a96c"
+};
+
+// ─── Standard guide og bias (kopieret fra appens kildekode) ──────────────────
+const GUIDE_DEFAULTS = [
+  {id:'g1',  order:0,  headline:'Dobbelt fokus: faglige + personlige kompetencer', short:'Hold altid balancen. Gå ikke 90% i den ene retning og 10% i den anden. Begge sider tæller.', detail:'Du kigger efter to ting samtidigt: kan de gøre jobbet fagligt (hard skills, det du ser på CV\'et), og er de det rigtige menneske at arbejde med (personlighed, motivation, soft skills)?\n\nHvis du kun fokuserer på det faglige, mister du viden om kulturelt fit og arbejdsglæde. Omvendt: en superflink personlighed uden kompetencer fungerer heller ikke.\n\nEn god check: Midt i interviewet. Spørg dig selv: "Har jeg nu fået et billede af begge sider?" Hvis du har brugt 80% på værdier og historier uden at have spurgt noget konkret fagligt, stop op og korriger kursen. Og omvendt.'},
+  {id:'g12', order:1,  headline:'Jobannoncen er dit første interview', short:'Behandl jobannoncen som du behandler CV\'er. AI-genererede floskler skræmmer de bedste kandidater væk.', detail:'Når enhver anden annonce er skrevet med ChatGPT og fyldt med "dynamisk leder", "innovativ kultur" og "faglig stolthed", skiller en annonce der er ærlig og konkret sig markant ud.\n\nDe bedste kandidater søger ikke job blindt. De læser og vurderer. Og de kan lugte en AI-genereret liste af ønsker på afstand.\n\nEn god jobannonce gør det samme som et godt CV: den fortæller en konkret historie.\n\n→ Hvad skal personen faktisk løse? Ikke en titel, men en opgave.\n→ Hvad er svært ved jobbet? Vær ærlig om det.\n→ Hvad har folk der lykkes i rollen gjort konkret?\n→ Hvem arbejder de med? Hvad er kulturen, virkelig?\n\nGode kandidater søger ikke jobs. De søger efter at blive forstået. En annonce der viser at du har tænkt grundigt, og ved hvad du leder efter, tiltrækker folk der faktisk vil jobbet. Ikke folk der bare søger alt.'},
+  {id:'g13', order:2,  headline:'Dine spørgsmål fortæller kandidaten hvem I er', short:'Spørgsmålene du stiller kommunikerer organisationens værdier. Og du kan ikke fake det.', detail:'Hvis du kun spørger om resultater, revenue og måltal, signalerer du at I er en kommerciel organisation der handler om tal. Kandidaten forstår: det handler om at levere.\n\nMen hvis du også spørger om fejl, læring, hvordan I hjælper hinanden, hvor kandidaten ville være uden jer, signalerer du en kultur hvor mennesker betyder noget. Hvor fejl er læringsmuligheder, ikke afskedigelser. Hvor folk udvikler sig sammen.\n\nSå før du printer din spørgsmålsliste ud, spørg dig selv: hvad fortæller disse spørgsmål om os? Hvad værdisætter vi? Hvad udelader vi helt?\n\nDe bedste kandidater søger også efter dygtige organisationer, ikke bare jobs. De vil høre dine spørgsmål, og du bliver bedømt på det.'},
+  {id:'g2',  order:3,  headline:'Observation over indhold: HVORDAN de svarer', short:'Det vigtigste er ikke altid hvad de svarer, men hvordan. Svarer de på det du spørger om? Kan de holde en pause og tænke sig om?', detail:'Det siger enormt meget om kognitiv modenhed og nærvær:\n\n→ Svarer de faktisk på det du spurgte, eller glider de udenom til noget nemmere?\n→ Tager de 3-4 sekunder til at tænke inden de svarer? Det er et godt tegn.\n→ Fylder de stilheden med ord for at undgå pausen? Det er et signal.\n→ Skyder de et øvet svar af øjeblikkeligt? Sandsynligvis forberedt frase. Bor dybere.\n\nEn kandidat der stopper, tænker, og giver et velovervejet svar viser at de kan håndtere usikkerhed og er til stede i situationen. Det er svært at øve sig på, og svært at fake.'},
+  {id:'g3',  order:4,  headline:'Tag en partner med: din wingman i rummet', short:'Aldrig alene. En kollega hvis rolle er at se det du ikke ser, og holde dig ærlig.', detail:'Det sker alt for tit: du bliver forelsket i en kandidat. Deres energi smitter af. Du er excited. Og det påvirker samtalen. Eller du er desperat efter at få stillingen besat, og uden at vide det motiverer du kandidaten på en måde der får dem til at virke bedre end de er.\n\nDin partner ser det udefra. De siger bagefter: "Jeg er ikke sikker på at energien kom fra kandidaten. Det var din entusiasme der drev den samtale."\n\nVigtigste spørgsmål: Hvor kom energien fra? Var det kandidaten der bragte det, eller var det dig?\n\nGiv din partner en eksplicit rolle: "Din opgave er at se det jeg ikke ser. Vær kritisk." Og lyt til dem efterfølgende, selv hvis du er uenig.'},
+  {id:'g4',  order:5,  headline:'To ører, én mund: tal mindre, lyt mere', short:'Det første spørgsmål er det vigtigste. Still det, og hold så mund i 15-20 minutter.', detail:'Jo mindre du siger om jobbet i starten, jo mere får du at vide om hvem de virkelig er.\n\nHvis du begynder at fortælle om jobbet for tidligt, ved de hvad du søger og begynder at svare det de tror du vil høre. Det ufiltrede svar uden dine påvirkninger er guld.\n\nSæt en norm fra start: "Inden vi fortæller dig hvad vi søger, vil vi gerne høre om dig. Kan du gå igennem dit CV og fortælle om hvad der drev dig?" Og så: hold mund. Vent. Observér.\n\nHvad lægger de vægt på? Hvad springer de let henover? Det de vælger at fremhæve er det mest ægte, styret af dem, ikke af dig.'},
+  {id:'g5',  order:6,  headline:'Den lille stemme: lyt til din intuition', short:'Den stemme der siger "jeg er ikke helt sikker" har næsten altid ret. Ignorer den ikke.', detail:'Vi har alle den. Du er ved at sige ja til nogen, men i bunden af maven sidder en lille stemme: "Jeg er ikke 100% overbevist."\n\nNæsten alle dårlige ansættelser starter med at man ignorerer den stemme. "Nah, det nok godt nok," tænker man. Og tre måneder senere, når det hele er gået galt, siger alle: "Ja, jeg vidste det faktisk fra dag ét."\n\nDen lille stemme er ikke bias. Det er erfaring der ikke er sat på ord endnu.\n\nHvad du skal gøre: Sig det højt til dine kollegaer. "Jeg har et godt fagligt indtryk, men jeg er ikke helt sikker på motivationen." Når I taler det ud, bliver det tydeligere, og I kan beslutte om det er et rødt flag eller bare støj.'},
+  {id:'g7',  order:7,  headline:'Gå videre når du har svaret', short:'Du har 60 minutter. Når du har det du skal bruge. Stop med at grave og bevæg dig videre.', detail:'En af de mest almindelige fejl: du fortsætter med at stille spørgsmål i et område selvom du allerede har fundet ud af hvad du ville vide.\n\n"Ja, men... hvad ellers?" Kandidaten begynder at gentage sig. Det bliver trægt. Du spilder tid du kunne bruge på noget helt tredje.\n\nKlar tankegang: "Har jeg nu et billede af [det jeg søgte svar på]?" Hvis ja. Gå videre.\n\nDu behøver ikke nå alle spørgsmål i banken. Det handler om at få det rigtige billede. Og det billede kan du sommetider tegne på 3 spørgsmål, sommetider 10. Fleksibilitet er en styrke.'},
+  {id:'g8',  order:8,  headline:'Portfolio check (anden samtale)', short:'Lad dem vise noget de allerede har lavet. Ikke noget nyt. Projekter, præsentationer, tekst.', detail:'I anden samtale: bed dem vise konkrete eksempler på tidligere arbejde. Ikke noget de skal lave nu, noget de allerede er stolte af.\n\nDet kan være:\n→ En præsentation de lavede\n→ En artikel eller rapport de skrev\n→ Et design, et koncept, en kampagne\n→ En email-korrespondance der viser hvordan de kommunikerer\n\nLad dem præsentere det og fortælle: Hvad var opgaven? Hvad var dit konkrete bidrag? Hvad var du mest stolt af? Hvad ville du lave om?\n\nDet fjerner dig fra teoretiske svar og ind i virkelighed. Og de fleste mennesker har noget de kan dele, uden at bryde fortrolighed.'},
+  {id:'g9',  order:9,  headline:'Mini-cases (anden samtale)', short:'5 slides, 10 min præsentation, 10 min diskussion. Ikke mere. Det handler om tankegang, ikke svar.', detail:'Brug cases til at se hvordan de tænker. Ikke for at se om de kan løse dit problem.\n\nGod case-format:\n→ 5 slides max. Ikke 20-30\n→ 10 minutter til præsentation fra deres side\n→ 10 minutter diskussion og opfølgning\n\nHvad du kigger efter:\n→ Kan de strukturere et argument?\n→ Kan de prioritere og sige hvad der er vigtigst?\n→ Hvad sker der når du udfordrer dem? Bliver de defensive, eller kan de tænke med dig?\n→ Er de realistiske, eller lever de i en teoretisk verden?\n\nUndgå cases der intet har med jobbet at gøre. Og undgå at kræve at de løser dit egentlige problem. Det er ikke rimeligt.'},
+  {id:'g10', order:10, headline:'Det ekstraordinære. Hvad gør de ud over arbejdet?', short:'Spørg hvad de laver ved siden af. Folk med rigtig kapacitet gør typisk noget extra.', detail:'Et simpelt spørgsmål: "Hvad laver du ud over arbejdet? Er der noget du er engageret i?"\n\nDu leder efter: Elite sport. Frivilligt arbejde. Et sprog de lærer. En hobby de bruger seriøse timer på. Undervisning. Et sideprojekt.\n\nDet behøver ikke være dramatisk, men du ser om der er drive og energi ud over det man betales for.\n\nObs: Vær ikke firkantet. Nogen prioriterer familie og børn over alt andet. Det er fuldstændig legitimt. Men spørg alligevel. Det giver et billede af hvem de er som menneske.\n\nDen lidt "skæve" ting de laver ved siden af kan netop være det der adskiller dem fra alle andre kandidater.'},
+  {id:'g6',  order:11, headline:'Find bevis: konkrete eksempler, ikke floskler', short:'"Det lyder godt, men kan du give mig et konkret eksempel?" Brug dette spørgsmål meget.', detail:'Der bliver sagt mange generelle ting til en jobsamtale. Det føles sommetider som et teater, hvor begge parter gerne vil se rigtig godt ud. Det kommer du selv omkring ved at være konkret, og på den anden side ved at lede efter og spørge om konkrete beviser.\n\nBor lidt i det. Er det noget der holder?\n\n→ "Fortæl om en gang du ledede nogen gennem noget virkelig svært. Hvad sagde du? Hvad skete der?"\n→ "Kan du give mig et konkret projekt hvor du brugte den kompetence? Hvad lavede du selv?"\n\nFolk der faktisk kan præstere, kan fortælle præcist hvad de gjorde. Folk der taler fint om det, kan ikke.\n\nGå gerne virkelig dybt i ét eksempel: Hvornår? Hvem? Hvad sagde du? Hvad var resultatet? Hvad ville du gøre anderledes? Det er her, de virkelige svar kommer frem.'},
+  {id:'g11', order:12, headline:'Bias-bevidsthed: kend din ubevidste bias', short:'Den farligste bias er den du ikke ved du har. Lær dig selv at kende.', detail:'Vi er alle biased. Det er et menneskeligt vilkår. Problemet er ikke at have bias. Det er ikke at vide om det.\n\nTypiske bias i rekruttering:\n→ "Folk som mig selv": vi foretrækker kandidater der minder om os\n→ Glorificering: ét stærkt punkt farver hele vurderingen\n→ Bekræftelsesbias: vi søger det der bekræfter vores første indtryk\n→ Kontrastbias: vi vurderer kandidater op mod hinanden, ikke op mod kravprofilen\n\nHvad du kan gøre:\n→ Skriv din vurdering ned inden du taler med de andre. Undgå at den første stemme styrer\n→ Spørg dig selv: "Kan jeg lide denne person, eller tror jeg de kan gøre jobbet?"\n→ Tag altid en anden med som kan se det du ikke ser\n→ Brug de samme spørgsmål til alle kandidater, det giver et fair grundlag\n\nSe vores biasliste for konkrete eksempler og beskrivelser.'},
+];
+
+const BIAS_DEFAULTS = [
+  {id:'b0',  order:-1, headline:'Ubevidst bias: den farligste af dem alle', short:'Den bias du ikke ved du har er den du ikke kan forsvare dig imod.', detail:'Ubevidst bias, også kaldet implicit bias, er den fordom eller forudindtagethed du bærer med dig uden at vide det. Den opstår automatisk, inden du når at tænke dig om. Og netop fordi den er ubevidst, er den den farligste.\n\nDe fleste mennesker er enige om at de ikke ønsker at diskriminere. Alligevel viser forskning konsekvent at vi gør det, fordi vores hjerne sorterer, kategoriserer og konkluderer på millisekunder, styret af mønstre vi ikke selv er klar over.\n\nEn aften kører en far og hans søn hjem fra en begivenhed. Bilen skrider ud og rammer et træ. Faren dør på stedet. Sønnen køres til hospitalet. Kirurgen ser drengen og siger: "Jeg kan ikke operere ham. Han er min søn." Hvordan kan det være? Kirurgen er hans mor.\n\nOver halvdelen sidder fast. Det er unconscious bias i praksis.\n\nHvad du kan gøre:\n→ Erkend at du har ubevidst bias. Alle har det.\n→ Strukturér din proces: stil de samme spørgsmål til alle, skriv din vurdering ned inden du taler med andre.\n→ Tag en wingman med.\n→ Evaluer kandidater mod kravprofilen, ikke mod hinanden.', notes:''},
+  {id:'b1',  order:0,  headline:'Ankerbias', short:'Det første indtryk sætter rammen for alt, der kommer efter.', detail:'Man baserer sin konklusion på det allerførste stykke information man møder. Et dårligt profilbillede kan ubevidst påvirke den måde, man efterfølgende fortolker personens uddannelse og karriere.\n\nAnkerbiasen gælder ikke kun det visuelle. Det gælder også den første ting kandidaten siger, det første ord du hæfter dig ved i en ansøgning, eller den første reference du taler med.\n\nHvad du kan gøre: Læs hele CV\'et og hæft dig ikke ved enkeltpunkter. Notér din samlede vurdering. Ikke delvurderinger der farver resten.', notes:''},
+  {id:'b2',  order:1,  headline:'Framing-effekt', short:'Indpakningen påvirker vurderingen. Ikke kun indholdet.', detail:'Det samme CV udformet med to forskellige designs vil blive oplevet som to vidt forskellige kandidater. Form og farver, layout og typografi påvirker din vurdering, selvom indholdet er identisk.\n\nDet er framing. Du bliver forstyrret af præsentation og det går ud over din evne til at vurdere substansen.\n\nHvad du kan gøre: Forsøg at standardisere hvad du læser og i hvilken rækkefølge. Spørg dig selv: "Ville jeg vurdere dette anderledes hvis det stod på et hvidt ark med sort tekst?"', notes:''},
+  {id:'b3',  order:2,  headline:'Gruppebias', short:'Vi favoriserer kandidater fra grupper vi selv tilhører.', detail:'En leder uddannet fra CBS vil ubevidst se på ansøgere fra CBS med mere varme end på dem med andre uddannelser. Det sker ikke bevidst. Det er genkendelse, der føles som kvalitet.\n\nDet gælder ikke kun uddannelse: sport, opvækst, branche, netværk. Er du vant til at ansætte fra ét bestemt miljø, vil du have sværere ved at se potentiale i kandidater fra et andet.\n\nHvad du kan gøre: Spørg dig selv aktivt: "Kan lide jeg denne kandidat fordi de minder om mig, eller fordi de faktisk kan gøre jobbet?"', notes:''},
+  {id:'b4',  order:3,  headline:'Kontrastbias', short:'Kandidater vurderes op mod hinanden. Ikke mod kravprofilen.', detail:'Efter at have talt med en meget stærk kandidat vil den næste fremstå svagere end de ville have gjort alene. Og omvendt: efter en svag kandidat vil den næste fremstå stærkere.\n\nDette er kontrastbias. Du vurderer ikke kandidaten mod den kravprofil du satte op. Du vurderer dem mod den forrige samtale.\n\nHvad du kan gøre: Hold altid kravprofilen frem som din målestok. Skriv din vurdering ned inden du taler med din kollega. Vurder altid en kandidat alene. Ikke i relation til de andre.', notes:''},
+  {id:'b5',  order:4,  headline:'Opmærksomhedsbias', short:'Du lægger mærke til det du selv tænker meget over til daglig.', detail:'Går du meget op i detaljer, ordenssans eller præcision, vil du søge netop den information hos kandidaten, og vægter det højere end andre egenskaber.\n\nOmvendt: er du selv kreativ og ustruktureret, vil du måske undervurdere kandidater der scorer lavt på orden men højt på kreativitet.\n\nDin opmærksomhed er selektiv. Den filtrerer information baseret på hvad der er relevant for dig. Ikke nødvendigvis hvad der er vigtigt for rollen.\n\nHvad du kan gøre: Kend dine egne primære værdier. Og tag en kollega med som vægter andre ting end dig.', notes:''},
+  {id:'b6',  order:5,  headline:'Tilgængelighedsbias', short:'Den viden der sidder øverst i dit hoved styrer din vurdering.', detail:'Er du netop i gang med at læse en bog om personlighed, vil du bruge den bog som linse når du vurderer kandidater. Ikke den akkumulerede viden du har bygget op over år.\n\nTilgængelighed handler om hvad der er let at aktivere mentalt. Det der sidder frisk i hukommelsen styrer dine slutninger, selvom det måske ikke er det mest relevante.\n\nHvad du kan gøre: Vær opmærksom på hvad der har fyldt for dig inden et interview. Er du påvirket af en nylig fejlansættelse? Et møde der gik galt? Det farver også.', notes:''},
+  {id:'b7',  order:6,  headline:'Glorificeringsbias (halo/horn)', short:'Ét stærkt, eller svagt, punkt farver hele vurderingen.', detail:'Kan du virkelig godt lide ét aspekt af en kandidat, vil du have en tendens til at se positivt på resten. Det kaldes halo-effekten.\n\nOmvendt: kan du ikke lide ét aspekt, vil det kaste en skygge over alt andet. Det kaldes horn-effekten.\n\nEt eksempel: en stavefejl i en ansøgning kan betyde at et stærkt kandidatur bliver kasseret, fordi stavefejlen aktiverer horn-effekten og farver alt efterfølgende negativt.\n\nHvad du kan gøre: Sørg for at evaluere kandidater på tværs af dimensioner separat. Stil de samme spørgsmål til alle. Lad ikke ét datapunkt styre det hele.', notes:''},
+  {id:'b8',  order:7,  headline:'Fundamental attributionsbias', short:'Vi forklarer andres valg med personlighed. Ikke med kontekst.', detail:'Mange jobskift på et CV tolkes som ustabilitet eller konfliktsøgen. Men måske arbejdede kandidaten i en branche der var i opbrud, eller de fulgte en leder de troede på.\n\nVi har en tendens til at forklare andres adfærd med hvem de er. Ikke med de omstændigheder de var i. Vi glemmer konteksten.\n\nHvad du kan gøre: Spørg altid ind til baggrunden bag valg. "Hvad skete der der?" er en bedre åbning end en konklusion om personlighed.', notes:''},
+  {id:'b9',  order:8,  headline:'Stereotyper', short:'Vi forventer bestemte træk hos folk fra bestemte grupper.', detail:'En bedstemor, en veganer, en bankuddannet, en selvlært programmør. Vi har alle forestillinger om hvad de er for nogen, inden vi har mødt dem.\n\nDisse forestillinger kan forhindre os i at se hele mennesket. Vi sorterer information der bekræfter stereotypen og ignorerer det der modsiger den.\n\nHvad du kan gøre: Vær opmærksom på hvornår du aktiverer gruppeidentiteter i dine slutninger. Stil dig selv spørgsmålet: "Hvad ved jeg faktisk om denne konkrete person?"', notes:''},
+  {id:'b10', order:9,  headline:'Social sammenligningsbias', short:'Vi vælger kandidater der ikke konkurrerer med os selv.', detail:'Ifølge denne bias vil man have en tendens til at vælge kandidater der ikke er bedre end en selv på de områder man selv er stærkest.\n\nEn konsulent der rekrutterer en ny kollega vil ubevidst frasorte kandidater der er stærkere end konsulenten selv på konsulentens kernekompetencer.\n\nDet er et menneskeligt selvbeskyttelsesinstinkt. Men det kan koste organisationen de bedste kandidater.\n\nHvad du kan gøre: Vær opmærksom på om du begejstres af kandidater der er anderledes end dig, men stærke på andre områder. Og sørg for at den endelige beslutning involverer flere end dig.', notes:''},
+  {id:'b11', order:10, headline:'Medløberbias', short:'Vi gør og tror det de fleste andre gør og tror.', detail:'Hvis alle i teamet er begejstrede for en kandidat, er det svært at sige noget andet. Den sociale pres til at følge stemningen er stærk.\n\nI ansættelsesudvalg kan dette betyde at den første person der taler, og er begejstret, sætter tonen for alle andres vurdering.\n\nHvad du kan gøre: Skriv din selvstændige vurdering ned inden du deler den med andre. Start ikke med "hvad synes I?". Start med at alle skriver en individuel vurdering ned.', notes:''},
+  {id:'b12', order:11, headline:'Bekræftelsesbias', short:'Vi søger det der bekræfter vores første mening, og ignorerer resten.', detail:'Har du et godt første indtryk af en kandidat, vil du ubevidst søge information der bekræfter det, og nedtone det der taler imod.\n\nDet er en af de mest udbredte bias i rekruttering. Den er svær at opdage præcis fordi den er ubevidst.\n\nHvad du kan gøre: Stil aktivt spørgsmål der udfordrer din hypotese. "Hvad ville tale imod denne kandidat?" er et vigtigt spørgsmål at stille sig selv, og sine kollegaer, inden beslutningen.', notes:''},
+  {id:'b13', order:12, headline:'Gruppetænkning', short:'Den herskende opfattelse i gruppen undertrykker afvigende synspunkter.', detail:'I et ansættelsesudvalg med en stærk personlighed kan det blive svært at sige noget der bryder med stemningen. Tvivl holdes inde. Den lille stemme ties ihjel.\n\nResultatet: en beslutning der virker enig, men som faktisk ikke er det. Og en fejlansættelse alle bagefter siger de "godt vidste".\n\nHvad du kan gøre: Skab en norm for at uenighed er velkomment. Bed alle skrive en individuel vurdering inden I taler sammen. Overvej at bede én person om at spille "djævelens advokat".', notes:''},
+  {id:'b14', order:13, headline:'Bagklogskabsbias', short:'Vi overdriver hvor godt vi forudså en hændelse, efter den er sket.', detail:'"Jeg vidste godt det ikke ville gå." Den sætning er langt lettere at sige efter en fejlansættelse end inden.\n\nBagklogskabsbias betyder at vi i tilbageblik rekonstruerer vores hukommelse så vi fremstår klogere end vi var. Det giver en falsk fornemmelse af at vi burde have set det komme.\n\nProblemet: det forhindrer os i at lære af fejl. Vi tror vi vidste noget vi ikke vidste.\n\nHvad du kan gøre: Dokumenter din vurdering inden ansættelsen. Hvad vidste du? Hvad var du i tvivl om? Det giver et ærligt billede at lære af efterfølgende.', notes:''},
+  {id:'b15', order:14, headline:'Illusion of control', short:'Vi tror vi kan påvirke ting der ligger uden for vores kontrol.', detail:'I rekruttering kan dette komme til udtryk som en overdreven tro på at et godt onboarding-forløb kan "fikse" en kandidat der ikke er rigtig til rollen.\n\n"Vi kan nok forme dem" er en klassisk manifestation. Det kan ende med at man ansætter en kandidat man dybest set er i tvivl om, fordi man tror man kan kompensere for det der mangler.\n\nHvad du kan gøre: Vær ærlig om hvad du kan ændre ved en kandidat, og hvad der er grundlæggende personlighed og motivation du ikke kan træne dig ud af.', notes:''},
+  {id:'b16', order:15, headline:'Self-serving bias', short:'Succes skyldes os selv. Fiasko skyldes omstændighederne.', detail:'Gik ansættelsen godt, var det fordi vi var gode til at rekruttere. Gik det galt, var det fordi kandidaten ikke levede op til det de lovede, eller fordi onboarding-processen svigede.\n\nDenne bias forhindrer os i at lære af egne fejl i rekruttering. Det er altid noget andet der er skyld i fejlansættelsen.\n\nHvad du kan gøre: Tag ejerskab over beslutningen. Også når den går galt. Hvad var din rolle i processen? Hvad ville du have gjort anderledes?', notes:''},
+  {id:'b17', order:16, headline:'Escalation of commitment', short:'Jo mere vi har investeret i en kandidat, jo sværere er det at sige nej.', detail:'Har du brugt tre samtaler, to tests og en case på en kandidat, er det psykologisk svært at konkludere at det ikke er den rigtige.\n\nMen beslutningen skal baseres på hvad der er rigtigt for rollen. Ikke på hvad du allerede har brugt af tid og energi.\n\nDet er escalation of commitment: man fastholder et forløb fordi man har investeret for meget til at stoppe.\n\nHvad du kan gøre: Sæt klare go/no-go-kriterier inden processen starter. Og vær villig til at stoppe, uanset hvad der er brugt.', notes:''},
+];
+
+// ─── App init ────────────────────────────────────────────────────────────────
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let questions = null;
+
+const logEl = document.getElementById('log');
+const log = (msg, cls) => {
+  const line = cls ? `<span class="${cls}">${msg}</span>` : msg;
+  logEl.innerHTML += '\n' + line;
+  logEl.scrollTop = logEl.scrollHeight;
+};
+const setLog = (msg) => { logEl.innerHTML = msg; };
+
+// ─── File picker ─────────────────────────────────────────────────────────────
+document.getElementById('jsonFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  const status = document.getElementById('loadStatus');
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!Array.isArray(data.questions)) {
+      throw new Error('JSON-filen mangler en "questions"-liste.');
+    }
+    // Validér at hver question har de nødvendige felter
+    for (const q of data.questions) {
+      if (!q.id || !q.cat || typeof q.text !== 'string') {
+        throw new Error(`Spørgsmål "${q.id || '?'}" mangler påkrævede felter (id, cat, text).`);
+      }
+    }
+    questions = data.questions;
+    document.getElementById('qCount').textContent = questions.length;
+    status.textContent = `✓ Indlæst ${questions.length} spørgsmål fra ${file.name}`;
+    status.style.color = 'var(--success)';
+    document.getElementById('seedBtn').disabled = false;
+    setLog(`Klar til seed: ${questions.length} spørgsmål, ${GUIDE_DEFAULTS.length} guide, ${BIAS_DEFAULTS.length} bias.`);
+  } catch (err) {
+    status.textContent = `✗ ${err.message}`;
+    status.style.color = 'var(--error)';
+    document.getElementById('seedBtn').disabled = true;
+    questions = null;
+  }
+});
+
+// ─── Seed handler ────────────────────────────────────────────────────────────
+document.getElementById('seedBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('seedBtn');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Skriver...';
+  setLog('');
+  log('▶ Starter seed til Firestore...', 'info');
+
+  try {
+    const batch = writeBatch(db);
+    const now = serverTimestamp();
+
+    // Master meta-doc (master/lib)
+    batch.set(doc(db, 'master', 'lib'), {
+      version: 1,
+      questionsCount: questions.length,
+      guideCount: GUIDE_DEFAULTS.length,
+      biasCount: BIAS_DEFAULTS.length,
+      lastUpdatedAt: now,
+      changelog: [{ version: 1, date: new Date(), summary: 'Initial seed' }]
+    });
+    log(`  ✓ master/lib (meta)`, 'ok');
+
+    // Spørgsmål
+    for (const q of questions) {
+      batch.set(doc(db, 'master', 'lib', 'questions', q.id), {
+        text: q.text,
+        notes: q.notes || '',
+        category: q.cat,
+        order: typeof q.order === 'number' ? q.order : 0,
+        version: 1,
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+    log(`  ✓ ${questions.length} spørgsmål forberedt`, 'ok');
+
+    // Guide
+    for (const g of GUIDE_DEFAULTS) {
+      batch.set(doc(db, 'master', 'lib', 'guide', g.id), {
+        headline: g.headline,
+        short: g.short,
+        detail: g.detail,
+        order: g.order,
+        version: 1,
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+    log(`  ✓ ${GUIDE_DEFAULTS.length} guide-punkter forberedt`, 'ok');
+
+    // Bias
+    for (const b of BIAS_DEFAULTS) {
+      batch.set(doc(db, 'master', 'lib', 'bias', b.id), {
+        headline: b.headline,
+        short: b.short,
+        detail: b.detail,
+        notes: b.notes || '',
+        order: b.order,
+        version: 1,
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+    log(`  ✓ ${BIAS_DEFAULTS.length} bias-punkter forberedt`, 'ok');
+
+    log(`▶ Committer batch (${1 + questions.length + GUIDE_DEFAULTS.length + BIAS_DEFAULTS.length} writes)...`, 'info');
+    await batch.commit();
+    log(``);
+    log(`✓✓✓ FÆRDIG. Master library er seedet.`, 'ok');
+    log(``);
+    log(`Tjek selv i Firebase Console:`, 'info');
+    log(`https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore`, 'info');
+    btn.textContent = '✓ Seedet';
+  } catch (err) {
+    log(``);
+    log(`✗ FEJL: ${err.message}`, 'err');
+    log(``);
+    log(`Detaljer i browser-konsollen (Cmd+Option+J).`, 'err');
+    console.error(err);
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+});
+</script>
+</body>
+</html>
