@@ -488,8 +488,10 @@ textarea.finput { resize: vertical; line-height: 1.65; }
 <!-- ─── Firebase loader (module) ─────────────────────────────────────────── -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
-  import { getFirestore, collection, getDocs, doc, getDoc }
-    from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+  import {
+    getFirestore, collection, getDocs, doc, getDoc,
+    writeBatch, serverTimestamp
+  } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
   import {
     getAuth, onAuthStateChanged,
     createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut
@@ -530,6 +532,102 @@ textarea.finput { resize: vertical; line-height: 1.65; }
     logout: () => signOut(auth),
     onChange: (cb) => onAuthStateChanged(auth, cb),
     current: () => auth.currentUser
+  };
+
+  // ─── User data: clone master + load user's copy ───────────────────────
+  // Tjek om brugeren allerede har en profil. Returnerer profile data eller null.
+  window.fbGetUserProfile = async (uid) => {
+    const snap = await getDoc(doc(db, 'users', uid));
+    return snap.exists() ? snap.data() : null;
+  };
+
+  // Klon hele master til users/{uid}/... Bruges KUN ved første login.
+  // Returnerer { questions: N, guide: N, bias: N, masterVersion }.
+  window.fbCloneMasterToUser = async (user) => {
+    const [metaSnap, qSnap, gSnap, bSnap] = await Promise.all([
+      getDoc(doc(db, 'master', 'lib')),
+      getDocs(collection(db, 'master/lib/questions')),
+      getDocs(collection(db, 'master/lib/guide')),
+      getDocs(collection(db, 'master/lib/bias')),
+    ]);
+    const masterVersion = metaSnap.exists() ? (metaSnap.data().version || 1) : 1;
+    const now = serverTimestamp();
+
+    const batch = writeBatch(db);
+
+    // Profile
+    batch.set(doc(db, 'users', user.uid), {
+      email: user.email,
+      role: 'user',
+      createdAt: now,
+      claimedFromAnonAt: null,
+      masterVersionAtClone: masterVersion
+    });
+
+    // Questions (med sourceId/sourceVersion + starred:false)
+    qSnap.docs.forEach(d => {
+      const data = d.data();
+      batch.set(doc(db, `users/${user.uid}/questions/${d.id}`), {
+        ...data,
+        sourceId: d.id,
+        sourceVersion: masterVersion,
+        customized: false,
+        starred: false,
+        createdAt: now,
+        updatedAt: now
+      });
+    });
+
+    // Guide
+    gSnap.docs.forEach(d => {
+      const data = d.data();
+      batch.set(doc(db, `users/${user.uid}/guide/${d.id}`), {
+        ...data,
+        sourceId: d.id,
+        sourceVersion: masterVersion,
+        customized: false,
+        createdAt: now,
+        updatedAt: now
+      });
+    });
+
+    // Bias (med tom note)
+    bSnap.docs.forEach(d => {
+      const data = d.data();
+      batch.set(doc(db, `users/${user.uid}/bias/${d.id}`), {
+        ...data,
+        sourceId: d.id,
+        sourceVersion: masterVersion,
+        customized: false,
+        note: '',
+        createdAt: now,
+        updatedAt: now
+      });
+    });
+
+    await batch.commit();
+    return {
+      questions: qSnap.size,
+      guide: gSnap.size,
+      bias: bSnap.size,
+      masterVersion
+    };
+  };
+
+  // Hent en brugers data fra users/{uid}/...
+  window.fbLoadUserData = async (uid) => {
+    const [profileSnap, qSnap, gSnap, bSnap] = await Promise.all([
+      getDoc(doc(db, 'users', uid)),
+      getDocs(collection(db, `users/${uid}/questions`)),
+      getDocs(collection(db, `users/${uid}/guide`)),
+      getDocs(collection(db, `users/${uid}/bias`)),
+    ]);
+    return {
+      profile: profileSnap.exists() ? profileSnap.data() : null,
+      questions: qSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+      guide:     gSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+      bias:      bSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+    };
   };
 </script>
 
@@ -600,9 +698,8 @@ async function loadFromFirestore() {
   saveQs(); saveGuide(); saveBiasData();
   try { localStorage.setItem(META_KEY, JSON.stringify(masterMeta)); } catch(e) {}
 }
-async function load() {
+async function loadAnonymous() {
   // Hvis bruger allerede har lokal cache: brug den (instant).
-  // Master kan tjekkes ved manuel "Hent master" senere.
   let hasLocal = false;
   try {
     const sQ = localStorage.getItem(Q_KEY);
@@ -627,6 +724,53 @@ async function load() {
   setStatus('henter master…');
   await loadFromFirestore();
   setStatus('master v' + (masterMeta.version || '?'));
+}
+
+// Hent (eller klon + hent) brugerens data fra Firestore
+async function loadForUser(user) {
+  setStatus('henter din kopi…');
+
+  // 1) Tjek om brugeren har en profil i Firestore
+  const profile = await window.fbGetUserProfile(user.uid);
+
+  // 2) Hvis ikke: klon hele master til brugerens space
+  if (!profile) {
+    setStatus('opretter din kopi…');
+    await window.fbCloneMasterToUser(user);
+  }
+
+  // 3) Hent brugerens data fra users/{uid}/...
+  const data = await window.fbLoadUserData(user.uid);
+
+  Qs = data.questions.map(q => ({
+    id: q.id,
+    cat: q.category,
+    order: typeof q.order === 'number' ? q.order : 0,
+    star: !!q.starred,
+    text: q.text || '',
+    notes: q.notes || ''
+  }));
+  Guide = data.guide.map(g => ({
+    id: g.id,
+    order: typeof g.order === 'number' ? g.order : 0,
+    headline: g.headline || '',
+    short: g.short || '',
+    detail: g.detail || ''
+  }));
+  Bias = data.bias.map(b => ({
+    id: b.id,
+    order: typeof b.order === 'number' ? b.order : 0,
+    headline: b.headline || '',
+    short: b.short || '',
+    detail: b.detail || '',
+    note: b.note || ''
+  }));
+
+  const v = data.profile?.masterVersionAtClone || '?';
+  setStatus('din kopi · v' + v);
+
+  // Cache lokalt for hurtig reload
+  saveQs(); saveGuide(); saveBiasData();
 }
 
 function setStatus(text) {
@@ -1282,16 +1426,73 @@ function updateAuthUI(user) {
   }
 }
 
+// ─── Auth-aware data reload ──────────────────────────────────────────────────
+let _lastAuthUid = null;
+
+function clearLocalCache() {
+  try {
+    localStorage.removeItem(Q_KEY);
+    localStorage.removeItem(G_KEY);
+    localStorage.removeItem(B_KEY);
+    localStorage.removeItem(META_KEY);
+  } catch(e) {}
+}
+
+async function handleAuthChange(user) {
+  const uid = user ? user.uid : null;
+  // Firebase fyrer onChange ved registrering — filtrér duplicate state fra
+  if (uid === _lastAuthUid) {
+    updateAuthUI(user);
+    return;
+  }
+  _lastAuthUid = uid;
+  updateAuthUI(user);
+
+  // Auth ændret mid-session — genindlæs data fra rette kilde
+  document.getElementById('loading').classList.remove('hidden');
+  try {
+    if (user) {
+      // Login: ryd evt. anonym cache, og hent (eller klon) brugerens kopi
+      clearLocalCache();
+      await loadForUser(user);
+    } else {
+      // Logout: ryd brugerens cache, og hent master igen anonymt
+      clearLocalCache();
+      await loadAnonymous();
+    }
+    render();
+  } catch (err) {
+    console.error('Auth change reload error:', err);
+  } finally {
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
 // ─── Init ────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   try {
-    await load();
+    // Vent på første auth-state fra Firebase, så vi ved hvor data skal hentes fra
+    const initialUser = await new Promise((resolve) => {
+      const unsub = window.fbAuth.onChange((user) => {
+        unsub();
+        resolve(user);
+      });
+    });
+
+    if (initialUser) {
+      await loadForUser(initialUser);
+      updateAuthUI(initialUser);
+    } else {
+      await loadAnonymous();
+      updateAuthUI(null);
+    }
+    _lastAuthUid = initialUser ? initialUser.uid : null;
+
     render();
     document.getElementById('loading').classList.add('hidden');
-    // Lyt på auth-state
-    if (window.fbAuth) {
-      window.fbAuth.onChange(updateAuthUI);
-    }
+
+    // Lyt på fremtidige auth-ændringer (login/logout under sessionen)
+    window.fbAuth.onChange(handleAuthChange);
   } catch (err) {
     console.error('Load error:', err);
     document.getElementById('loading').innerHTML =
