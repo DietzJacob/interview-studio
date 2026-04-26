@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Studio · & Dietz</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink:   #1a1916;
+  --ink70: rgba(26,25,22,0.70);
+  --ink60: rgba(26,25,22,0.60);
+  --ink40: rgba(26,25,22,0.40);
+  --ink30: rgba(26,25,22,0.30);
+  --ink15: rgba(26,25,22,0.15);
+  --ink10: rgba(26,25,22,0.08);
+  --ink05: rgba(26,25,22,0.04);
+  --white: #ffffff;
+  --bg:    #f7f5f2;
+  --card:  #fefefe;
+  --accent:  oklch(52% 0.14 38);
+  --warm:    oklch(97.5% 0.004 60);
+  --display: 'Cormorant Garamond', Georgia, serif;
+  --sans:    'IBM Plex Sans', system-ui, sans-serif;
+  --mono:    'IBM Plex Mono', monospace;
+  --cat-aabning-ink:     oklch(38% 0.07 230); --cat-aabning-bg:     oklch(94% 0.03 230);
+  --cat-kompetencer-ink: oklch(37% 0.08 168); --cat-kompetencer-bg: oklch(94% 0.03 168);
+  --cat-adfaerd-ink:     oklch(37% 0.05 52);  --cat-adfaerd-bg:     oklch(94% 0.02 52);
+  --cat-resultater-ink:  oklch(37% 0.08 128); --cat-resultater-bg:  oklch(94% 0.03 128);
+  --cat-reference-ink:   oklch(38% 0.05 80);  --cat-reference-bg:   oklch(94% 0.02 80);
+}
+html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--ink); -webkit-text-size-adjust: 100%; }
+body { display: flex; flex-direction: column; overflow: hidden; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ink15); border-radius: 4px; }
+/* ── Header ── */
+header {
+  height: 52px; background: var(--card); border-bottom: 1px solid var(--ink10);
+  display: flex; align-items: stretch; flex-shrink: 0; z-index: 100;
+}
+.hdr-brand {
+  width: 220px; border-right: 1px solid var(--ink10); flex-shrink: 0;
+  display: flex; align-items: center; padding: 0 20px; gap: 8px;
+}
+.hdr-brand-name { font-family: var(--display); font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.hdr-brand-sub  { font-size: 11px; color: var(--ink30); }
+.hdr-tabs { flex: 1; display: flex; align-items: stretch; padding: 0 8px; }
+.hdr-tab {
+  padding: 0 16px; background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  border-bottom: 2px solid transparent;
+  color: var(--ink60); font-family: var(--sans); font-size: 13px; font-weight: 400;
+  transition: all 0.15s; white-space: nowrap;
+}
+.hdr-tab.active { border-bottom-color: var(--ink); color: var(--ink); font-weight: 500; }
+.hdr-tab:hover:not(.active) { color: var(--ink); }
+.hdr-tab .tab-count { font-size: 11px; font-family: var(--mono); color: var(--ink30); }
+.hdr-actions { display: flex; align-items: center; padding: 0 20px; gap: 8px; }
+.hdr-btn {
+  padding: 6px 14px; background: var(--ink10); color: var(--ink60);
+  border: none; border-radius: 7px; font-family: var(--sans);
+  font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.hdr-btn:hover { background: var(--ink15); color: var(--ink); }
+.hdr-btn-primary { background: var(--ink); color: var(--white); }
+.hdr-btn-primary:hover { background: #333; }
+.hdr-status { font-size: 11px; color: var(--ink30); margin-right: 8px; font-family: var(--mono); }
+/* ── Body wrap ── */
+.body-wrap { flex: 1; display: flex; overflow: hidden; }
+.section { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.section.active { display: flex; }
+/* ── Chip toolbar ── */
+.chip-toolbar {
+  padding: 10px 20px; border-bottom: 1px solid var(--ink10);
+  display: flex; gap: 5px; align-items: center; flex-wrap: wrap;
+  background: var(--card); flex-shrink: 0;
+}
+.chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 20px; border: none; cursor: pointer;
+  background: var(--ink05); color: var(--ink60);
+  font-family: var(--sans); font-size: 12px; font-weight: 500; transition: all 0.15s;
+}
+.chip:hover { background: var(--ink10); color: var(--ink); }
+.chip.active { background: var(--ink); color: var(--white); }
+.chip .chip-count { font-size: 10px; font-family: var(--mono); color: var(--ink30); }
+.chip.active .chip-count { color: rgba(255,255,255,0.55); }
+.chip-divider { width: 1px; height: 20px; background: var(--ink10); flex-shrink: 0; margin: 0 3px; }
+.chip-add {
+  margin-left: auto; padding: 5px 14px; background: var(--ink); color: var(--white);
+  border: none; border-radius: 20px; font-family: var(--sans);
+  font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.chip-add:hover { background: #333; }
+/* ── Q stereo layout ── */
+.q-stereo { flex: 1; display: flex; overflow: hidden; }
+.q-center { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.q-main { flex: 1; overflow-y: auto; padding: 14px 20px; }
+/* ── Setup panel (left of questions) ── */
+.setup-panel {
+  width: 220px; flex-shrink: 0; border-right: 1px solid var(--ink10);
+  background: var(--card); overflow-y: auto; padding: 20px 18px;
+  display: flex; flex-direction: column; gap: 0;
+}
+.setup-panel-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink30); margin-bottom: 12px; }
+.setup-field { margin-bottom: 10px; }
+.setup-field label { display: block; font-size: 11px; font-weight: 500; color: var(--ink60); margin-bottom: 4px; }
+.setup-field input { width: 100%; padding: 7px 10px; border-radius: 7px; border: 1.5px solid var(--ink10); font-size: 12px; font-family: var(--sans); outline: none; background: var(--white); color: var(--ink); transition: border-color 0.15s; }
+.setup-field input:focus { border-color: var(--ink30); }
+.setup-divider { height: 1px; background: var(--ink10); margin: 16px 0; }
+.nl-row { display: flex; gap: 5px; margin-bottom: 0; }
+.nl-btn { flex: 1; height: 30px; border-radius: 6px; border: 1.5px solid var(--ink10); background: var(--white); color: var(--ink60); font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--sans); transition: all 0.15s; }
+.nl-btn.active { border-color: var(--ink); background: var(--ink); color: var(--white); }
+.setup-hint { font-size: 11px; color: var(--ink30); line-height: 1.65; }
+/* ── Question card ── */
+.q-card {
+  margin-bottom: 5px; border-radius: 9px; overflow: hidden;
+  border: 1.5px solid var(--ink10); background: var(--card); transition: border-color 0.12s;
+  touch-action: none;
+}
+.q-card.starred { border-color: var(--ink15); background: #f5f4f2; }
+.q-card.drag-over { box-shadow: 0 0 0 2px var(--accent); border-color: var(--accent); }
+.q-card.dragging { opacity: 0.3; }
+.q-inner { display: flex; gap: 10px; align-items: flex-start; padding: 11px 12px; }
+.q-handle { color: var(--ink15); font-size: 15px; padding: 3px 2px; flex-shrink: 0; cursor: grab; user-select: none; touch-action: none; line-height: 1; }
+.q-handle:active { cursor: grabbing; color: var(--ink40); }
+.q-star { background: none; border: none; cursor: pointer; padding: 0; line-height: 1; font-size: 15px; color: var(--ink15); flex-shrink: 0; transition: color 0.15s; }
+.q-star.on { color: var(--accent); }
+.q-body { flex: 1; min-width: 0; }
+.q-text { font-size: 13px; line-height: 1.6; color: var(--ink); }
+.q-meta { margin-top: 5px; display: flex; align-items: center; gap: 7px; }
+.q-expand-btn { background: none; border: none; cursor: pointer; font-size: 11px; color: var(--ink15); flex-shrink: 0; padding: 2px 3px; line-height: 1; transition: color 0.15s; }
+.q-expand-btn:hover, .q-expand-btn.open { color: var(--ink40); }
+.q-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.q-ic { width: 28px; height: 28px; border-radius: 6px; border: 1.5px solid var(--ink10); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; color: var(--ink15); transition: all 0.13s; font-family: var(--sans); }
+.q-ic:hover { border-color: var(--ink30); color: var(--ink60); }
+.q-ic.del:hover { border-color: #c03030; color: #c03030; }
+.cat-tag { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; white-space: nowrap; display: inline-block; }
+.q-listen { border-top: 1px solid var(--ink10); padding: 11px 12px 13px 37px; background: var(--warm); }
+.q-listen-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink30); margin-bottom: 6px; }
+.q-listen-body { font-size: 12px; color: var(--ink60); line-height: 1.72; white-space: pre-line; }
+.cat-hd { display: flex; align-items: center; gap: 9px; margin: 16px 0 7px; padding: 0 2px; }
+.cat-hd:first-child { margin-top: 0; }
+.cat-hd-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.cat-hd-line { flex: 1; height: 1px; background: var(--ink10); }
+/* ── Right panel (questions) ── */
+.q-panel { width: 228px; border-left: 1px solid var(--ink10); display: flex; flex-direction: column; flex-shrink: 0; background: var(--card); }
+.panel-hdr { padding: 14px 16px 12px; border-bottom: 1px solid var(--ink10); flex-shrink: 0; }
+.panel-hdr-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink30); margin-bottom: 4px; }
+.panel-count { display: flex; align-items: baseline; gap: 6px; }
+.panel-n { font-family: var(--display); font-size: 32px; font-weight: 500; line-height: 1; color: var(--ink15); transition: color 0.2s; }
+.panel-n.has-items { color: var(--accent); }
+.panel-n-label { font-size: 12px; color: var(--ink30); }
+.panel-list { flex: 1; overflow-y: auto; padding: 8px 14px; }
+.panel-empty { font-size: 12px; color: var(--ink30); line-height: 1.7; padding-top: 4px; }
+.panel-item { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--ink05); align-items: flex-start; }
+.panel-num { font-family: var(--mono); font-size: 10px; color: var(--ink30); flex-shrink: 0; margin-top: 2px; }
+.panel-item-text { font-size: 12px; line-height: 1.5; color: var(--ink); }
+.panel-footer { padding: 10px 14px; border-top: 1px solid var(--ink10); display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+.panel-btn { padding: 8px; border: none; border-radius: 7px; font-family: var(--sans); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.panel-btn-primary { background: var(--ink); color: var(--white); }
+.panel-btn-primary:hover { background: #333; }
+.panel-btn-ghost { background: none; color: var(--ink30); border: 1px solid var(--ink10); }
+.panel-btn-ghost:hover { border-color: var(--ink30); color: var(--ink60); }
+/* ── Guide & Bias ── */
+.section-sub-hdr { padding: 11px 20px; border-bottom: 1px solid var(--ink10); display: flex; align-items: center; justify-content: space-between; background: var(--card); flex-shrink: 0; }
+.section-sub-hdr-info .sub-count { font-size: 13px; font-weight: 500; }
+.section-sub-hdr-info .sub-hint  { font-size: 12px; color: var(--ink30); margin-top: 1px; }
+.section-list { flex: 1; overflow-y: auto; padding: 14px 20px; }
+.intro-card { margin-bottom: 14px; padding: 16px 20px; background: var(--card); border-radius: 10px; border: 1px solid var(--ink10); }
+.intro-card-title { font-family: var(--display); font-size: 18px; font-weight: 500; margin-bottom: 5px; }
+.intro-card-body  { font-size: 12px; color: var(--ink60); line-height: 1.72; }
+.acc-card { margin-bottom: 5px; border-radius: 10px; overflow: hidden; border: 1px solid var(--ink10); background: var(--card); transition: border-color 0.15s; }
+.acc-card.open { border-color: var(--ink15); }
+.acc-top { display: flex; gap: 12px; align-items: flex-start; padding: 13px 16px; cursor: pointer; }
+.acc-num { font-family: var(--mono); font-size: 11px; color: var(--ink30); flex-shrink: 0; margin-top: 1px; min-width: 20px; }
+.acc-summary { flex: 1; }
+.acc-title { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+.acc-short { font-size: 12px; color: var(--ink60); line-height: 1.55; }
+.acc-note-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
+.acc-chevron { font-size: 11px; color: var(--ink30); flex-shrink: 0; margin-top: 2px; user-select: none; }
+.acc-actions { display: flex; gap: 4px; align-items: center; }
+.acc-ic { width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--ink10); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--ink30); transition: all 0.13s; font-family: var(--sans); }
+.acc-ic:hover { border-color: var(--ink30); color: var(--ink60); }
+.acc-ic.del:hover { border-color: #c03030; color: #c03030; }
+.acc-detail { border-top: 1px solid var(--ink10); padding: 13px 16px 15px 48px; background: var(--warm); }
+.acc-detail-body { font-size: 12.5px; color: var(--ink60); line-height: 1.75; white-space: pre-line; }
+.note-display { margin-top: 12px; padding: 9px 12px; background: var(--bg); border-radius: 6px; font-size: 12px; color: var(--ink70); line-height: 1.65; font-style: italic; }
+.note-edit-btn { background: none; border: none; cursor: pointer; font-size: 11px; color: var(--ink30); margin-top: 10px; font-family: var(--sans); padding: 0; }
+.note-edit-btn:hover { color: var(--ink60); }
+.note-textarea { width: 100%; padding: 8px 10px; border-radius: 7px; border: 1.5px solid var(--ink15); font-size: 12px; font-family: var(--sans); outline: none; line-height: 1.6; resize: none; background: var(--white); color: var(--ink); margin-top: 10px; }
+.note-textarea:focus { border-color: var(--ink30); }
+.note-save-row { display: flex; gap: 6px; margin-top: 6px; }
+.note-btn { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-family: var(--sans); cursor: pointer; border: none; }
+.note-btn-primary { background: var(--ink); color: var(--white); }
+.note-btn-ghost { background: none; border: 1px solid var(--ink10); color: var(--ink60); }
+/* ── Modal ── */
+.overlay { position: fixed; inset: 0; background: rgba(26,25,22,0.42); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+.overlay.on { display: flex; }
+.modal { background: var(--white); border-radius: 14px; width: 480px; max-width: 90vw; box-shadow: 0 24px 64px rgba(0,0,0,0.2); overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
+.modal-hdr { padding: 18px 22px; border-bottom: 1px solid var(--ink10); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.modal-title { font-family: var(--display); font-size: 18px; font-weight: 500; }
+.modal-close { background: none; border: none; cursor: pointer; color: var(--ink30); font-size: 18px; line-height: 1; transition: color 0.15s; }
+.modal-close:hover { color: var(--ink); }
+.modal-body { padding: 18px 22px; overflow-y: auto; }
+.modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.flbl { display: block; font-size: 11px; font-weight: 500; color: var(--ink60); margin-bottom: 5px; letter-spacing: 0.02em; }
+.flbl span { font-weight: 400; color: var(--ink30); letter-spacing: 0; }
+.finput { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--ink15); font-size: 13px; font-family: var(--sans); outline: none; background: var(--white); color: var(--ink); display: block; margin-bottom: 14px; transition: border-color 0.15s; }
+.finput:focus { border-color: var(--ink40); }
+textarea.finput { resize: vertical; line-height: 1.65; }
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+.cat-opt { padding: 8px 10px; border-radius: 7px; border: 1.5px solid var(--ink10); background: transparent; color: var(--ink40); cursor: pointer; font-size: 12.5px; font-family: var(--sans); text-align: left; transition: all 0.12s; }
+.cat-opt.sel { font-weight: 600; }
+.btn { border: none; border-radius: 7px; cursor: pointer; font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 8px 18px; transition: all 0.15s; }
+.btn-primary { background: var(--ink); color: var(--white); }
+.btn-primary:hover { background: #333; }
+.btn-secondary { background: none; border: 1px solid var(--ink10); color: var(--ink60); }
+.btn-secondary:hover { border-color: var(--ink30); color: var(--ink); }
+.btn-danger { background: #c03030; color: #fff; }
+.btn-danger:hover { background: #a02020; }
+/* ── Delete confirm ── */
+.del-overlay { position: fixed; inset: 0; background: rgba(26,25,22,0.45); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+.del-overlay.on { display: flex; }
+.del-box { background: var(--bg); border-radius: 12px; padding: 24px 26px; max-width: 380px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.del-box h3 { font-family: var(--display); font-size: 18px; font-weight: 400; margin-bottom: 9px; }
+.del-box p  { font-size: 13px; color: var(--ink60); line-height: 1.6; margin-bottom: 18px; }
+.del-actions { display: flex; justify-content: flex-end; gap: 8px; }
+/* ── Drag ghost ── */
+.drag-ghost { position: fixed; pointer-events: none; z-index: 999; opacity: 0.85; border-radius: 9px; box-shadow: 0 10px 32px rgba(0,0,0,0.15); transform: rotate(0.5deg) scale(1.01); transition: none; }
+/* ── Empty state ── */
+.empty-state { text-align: center; padding: 60px 0; color: var(--ink30); }
+.empty-state h2 { font-family: var(--display); font-size: 22px; font-weight: 400; margin-bottom: 7px; }
+.empty-state p  { font-size: 13px; }
+/* ── Loading screen ── */
+#loading { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: 12px; }
+#loading.hidden { display: none; }
+.loading-title { font-family: var(--display); font-size: 26px; font-weight: 500; color: var(--ink); }
+.loading-sub   { font-size: 12px; color: var(--ink30); font-family: var(--mono); }
+.loading-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink30); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+/* ── PDF view (regular) ── */
+#pv { display: none; overflow-y: auto; max-width: 700px; width: 100%; margin: 0 auto; padding: 40px 52px 80px; font-family: var(--sans); }
+.pv-ctrl { display: flex; gap: 10px; margin-bottom: 32px; }
+/* ── Print doc typography ── */
+.pdoc { font-family: var(--sans); color: #1a1916; }
+.pdoc-hdr { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 14pt; border-bottom: 2pt solid #1a1916; margin-bottom: 22pt; }
+.pdoc-name { font-family: var(--display); font-size: 26pt; font-weight: 500; line-height: 1; margin-bottom: 5pt; }
+.pdoc-meta { font-size: 9pt; color: rgba(26,25,22,0.5); display: flex; gap: 14pt; }
+.pdoc-brand { font-family: var(--display); font-size: 10pt; color: rgba(26,25,22,0.4); }
+.pdoc-sec-lbl { font-size: 7.5pt; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(26,25,22,0.38); margin-bottom: 10pt; }
+.pdoc-q-block { margin-bottom: 18pt; page-break-inside: avoid; }
+.pdoc-q-row { display: flex; gap: 10pt; align-items: flex-start; margin-bottom: 6pt; }
+.pdoc-q-num { font-family: var(--mono); font-size: 8pt; color: rgba(26,25,22,0.35); flex-shrink: 0; padding-top: 1.5pt; width: 14pt; }
+.pdoc-q-text { font-size: 11pt; line-height: 1.45; flex: 1; }
+.pdoc-q-meta { display: flex; justify-content: space-between; align-items: center; padding-left: 24pt; margin-bottom: 5pt; }
+.pdoc-q-cat { font-size: 8pt; color: rgba(26,25,22,0.4); font-weight: 500; }
+.pdoc-rating { display: flex; gap: 5pt; align-items: center; }
+.pdoc-circle { width: 9pt; height: 9pt; border-radius: 50%; border: 1pt solid rgba(26,25,22,0.3); display: inline-block; flex-shrink: 0; }
+.pdoc-rating-lbl { font-size: 7pt; color: rgba(26,25,22,0.3); margin-left: 4pt; font-style: italic; }
+.pdoc-note-lines { padding-left: 24pt; }
+.pdoc-note-line { border-bottom: 0.6pt solid rgba(26,25,22,0.15); height: 16pt; margin-bottom: 2pt; }
+.pdoc-divider { border: none; border-top: 0.6pt solid rgba(26,25,22,0.12); margin: 16pt 0; }
+.pdoc-dims { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt 24pt; margin-bottom: 16pt; }
+.pdoc-dim-row { display: flex; align-items: center; justify-content: space-between; gap: 10pt; }
+.pdoc-dim-label { font-size: 10pt; }
+.pdoc-rec-row { display: flex; gap: 20pt; align-items: center; margin-bottom: 16pt; }
+.pdoc-rec-opt { display: flex; align-items: center; gap: 6pt; }
+.pdoc-rec-box { width: 10pt; height: 10pt; border: 1pt solid rgba(26,25,22,0.35); display: inline-block; flex-shrink: 0; }
+.pdoc-rec-label { font-size: 10pt; }
+.pdoc-footer { margin-top: 18pt; padding-top: 8pt; border-top: 0.6pt solid rgba(26,25,22,0.15); display: flex; justify-content: space-between; }
+.pdoc-footer-text { font-size: 7.5pt; color: rgba(26,25,22,0.3); font-family: var(--display); font-style: italic; }
+/* ── Print media ── */
+@media print {
+  @page { margin: 2cm; }
+  body.pv-mode header,
+  body.pv-mode .body-wrap,
+  body.pv-mode .pv-ctrl { display: none !important; }
+  body.pv-mode #pv { display: block !important; padding: 0; margin: 0; max-width: 100%; overflow: visible; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loading">
+  <div class="loading-title">Interview Studio</div>
+  <div class="loading-sub">Henter spørgsmål fra master <span class="loading-dot"></span></div>
+</div>
+
+<header>
+  <div class="hdr-brand">
+    <span class="hdr-brand-name">Interview Studio</span>
+    <span class="hdr-brand-sub">& Dietz</span>
+  </div>
+  <nav class="hdr-tabs">
+    <button class="hdr-tab active" id="tab-q" onclick="switchTab('q')">Spørgsmål <span class="tab-count" id="tab-q-count">0</span></button>
+    <button class="hdr-tab" id="tab-g" onclick="switchTab('g')">Interviewguide <span class="tab-count" id="tab-g-count">0</span></button>
+    <button class="hdr-tab" id="tab-b" onclick="switchTab('b')">Bias <span class="tab-count" id="tab-b-count">0</span></button>
+  </nav>
+  <div class="hdr-actions">
+    <span class="hdr-status" id="hdr-status" title="Datakilde"></span>
+    <button class="hdr-btn" id="hdr-pdf" onclick="showPV()">⎙ Download PDF</button>
+    <button class="hdr-btn hdr-btn-primary" id="hdr-add" onclick="openAdd()">+ Nyt spørgsmål</button>
+  </div>
+</header>
+
+<!-- PDF view lives outside body-wrap so body-wrap:none doesn't hide it -->
+<div id="pv">
+  <div class="pv-ctrl">
+    <button class="btn btn-primary" onclick="window.print()">⎙ Gem som PDF / Udskriv</button>
+    <button class="btn btn-secondary" onclick="hidePV()">← Tilbage</button>
+  </div>
+  <div id="pv-content"></div>
+</div>
+
+<div class="body-wrap">
+  <!-- Questions -->
+  <section class="section active" id="sec-q">
+    <div class="q-stereo">
+      <!-- Left: candidate setup panel -->
+      <div class="setup-panel">
+        <div class="setup-panel-lbl">Kandidat</div>
+        <div class="setup-field"><label>Navn</label><input id="ev-name" placeholder="Anna Møller"></div>
+        <div class="setup-field"><label>Stilling</label><input id="ev-role" placeholder="Head of Marketing"></div>
+        <div class="setup-field"><label>Dato</label><input id="ev-date" placeholder="19. april 2026"></div>
+        <div class="setup-field"><label>Interviewer</label><input id="ev-iewer" placeholder="Jacob Dietz"></div>
+        <div class="setup-divider"></div>
+        <div class="setup-panel-lbl">Note-linjer pr. spørgsmål</div>
+        <div class="nl-row" id="nl-row">
+          <button class="nl-btn" onclick="setNL(2)">2</button>
+          <button class="nl-btn active" onclick="setNL(3)">3</button>
+          <button class="nl-btn" onclick="setNL(4)">4</button>
+          <button class="nl-btn" onclick="setNL(5)">5</button>
+        </div>
+        <div class="setup-divider"></div>
+        <div class="setup-hint">★ Markér spørgsmål til højre og tryk <em>Download PDF</em> for at generere dit interviewark med plads til noter og vurdering pr. spørgsmål.</div>
+      </div>
+      <!-- Center: chips + list -->
+      <div class="q-center">
+        <div class="chip-toolbar" id="q-chips">
+          <button class="chip active" data-f="all" onclick="setFilter('all')">Alle <span class="chip-count" id="cnt-all">0</span></button>
+          <button class="chip" data-f="aabning" onclick="setFilter('aabning')">Screening <span class="chip-count" id="cnt-aabning">0</span></button>
+          <button class="chip" data-f="kompetencer" onclick="setFilter('kompetencer')">Kompetencer <span class="chip-count" id="cnt-kompetencer">0</span></button>
+          <button class="chip" data-f="adfaerd" onclick="setFilter('adfaerd')">Adfærd <span class="chip-count" id="cnt-adfaerd">0</span></button>
+          <button class="chip" data-f="resultater" onclick="setFilter('resultater')">Resultater <span class="chip-count" id="cnt-resultater">0</span></button>
+          <button class="chip" data-f="reference" onclick="setFilter('reference')">Referencetjek <span class="chip-count" id="cnt-reference">0</span></button>
+          <div class="chip-divider"></div>
+          <button class="chip" id="chip-starred" data-f="starred" onclick="setFilter('starred')">★ Markerede <span class="chip-count" id="cnt-starred">0</span></button>
+        </div>
+        <div class="q-main" id="q-list"></div>
+      </div>
+      <!-- Right: Til interviewet -->
+      <div class="q-panel">
+        <div class="panel-hdr">
+          <div class="panel-hdr-lbl">Til interviewet</div>
+          <div class="panel-count">
+            <span class="panel-n" id="panel-n">0</span>
+            <span class="panel-n-label">markeret</span>
+          </div>
+        </div>
+        <div class="panel-list" id="panel-list"><div class="panel-empty">★ Markér spørgsmål du vil bruge, og download dem som PDF-guide.</div></div>
+        <div class="panel-footer" id="panel-footer" style="display:none">
+          <button class="panel-btn panel-btn-primary" onclick="showPV()">⎙ Download PDF</button>
+          <button class="panel-btn panel-btn-ghost" onclick="clearStars()">Ryd markering</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Guide -->
+  <section class="section" id="sec-g">
+    <div class="section-sub-hdr">
+      <div class="section-sub-hdr-info">
+        <div class="sub-count" id="g-count-lbl">0 principper</div>
+        <div class="sub-hint">Klik på et princip for at læse mere</div>
+      </div>
+      <button class="chip-add" onclick="openAddGuide()">+ Nyt princip</button>
+    </div>
+    <div class="section-list" id="g-list">
+      <div class="intro-card">
+        <div class="intro-card-title">Greatest Hits</div>
+        <div class="intro-card-body">De her principper er ikke teori. De er destilleret fra samtaler med over 20 erfarne ledere og egne erfaringer fra tusindvis af timer i rekrutteringsrummet. Brug dem som tjekliste inden, refleksion efter, eller som en reminder om hvad der faktisk gør forskellen.</div>
+      </div>
+    </div>
+  </section>
+  <!-- Bias -->
+  <section class="section" id="sec-b">
+    <div class="section-sub-hdr">
+      <div class="section-sub-hdr-info">
+        <div class="sub-count" id="b-count-lbl">0 former for bias</div>
+        <div class="sub-hint">Klik for at læse mere · ✎ Tilføj egne noter</div>
+      </div>
+      <button class="chip-add" onclick="openAddBias()">+ Ny bias</button>
+    </div>
+    <div class="section-list" id="b-list">
+      <div class="intro-card">
+        <div class="intro-card-title">Mennesketyper, personlighedstræk og bias</div>
+        <div class="intro-card-body">Vi bliver aldrig fri for bias. Det er et menneskeligt vilkår. Pointen er at blive mere bevidst. Ikke perfekt.</div>
+      </div>
+      <div id="b-cards"></div>
+    </div>
+  </section>
+</div><!-- /body-wrap -->
+
+<!-- Modals -->
+<div class="overlay" id="q-overlay" onclick="if(event.target===this)closeQModal()">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="q-modal-title">Nyt spørgsmål</div><button class="modal-close" onclick="closeQModal()">×</button></div>
+    <div class="modal-body">
+      <label class="flbl">Spørgsmål</label>
+      <textarea class="finput" id="q-text" rows="3" placeholder="Skriv dit interviewspørgsmål her…"></textarea>
+      <label class="flbl">Kategori</label>
+      <div class="cat-grid" id="cat-grid"></div>
+      <label class="flbl">Hvad lytter jeg efter? <span>valgfrit</span></label>
+      <textarea class="finput" id="q-notes" rows="3" placeholder="Røde flag, følgespørgsmål, hvad du observerer…"></textarea>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeQModal()">Annuller</button>
+        <button class="btn btn-primary" onclick="saveQ()">Gem spørgsmål</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="g-overlay" onclick="if(event.target===this)closeGModal()">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="g-modal-title">Nyt princip</div><button class="modal-close" onclick="closeGModal()">×</button></div>
+    <div class="modal-body">
+      <label class="flbl">Overskrift</label><input class="finput" type="text" id="g-headline" placeholder="Principnavn">
+      <label class="flbl">Kort forklaring <span>vises på kortet</span></label><textarea class="finput" id="g-short" rows="2" placeholder="Én sætning"></textarea>
+      <label class="flbl">Detaljer & teknikker <span>åbnes ved klik</span></label><textarea class="finput" id="g-detail" rows="5" placeholder="Uddybende forklaring…"></textarea>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeGModal()">Annuller</button>
+        <button class="btn btn-primary" onclick="saveGuideEntry()">Gem princip</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="b-overlay" onclick="if(event.target===this)closeBModal()">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="b-modal-title">Ny bias</div><button class="modal-close" onclick="closeBModal()">×</button></div>
+    <div class="modal-body">
+      <label class="flbl">Navn</label><input class="finput" type="text" id="b-name" placeholder="Biasnavn">
+      <label class="flbl">Kort forklaring <span>vises på kortet</span></label><textarea class="finput" id="b-short" rows="2" placeholder="Én sætning"></textarea>
+      <label class="flbl">Beskrivelse <span>åbnes ved klik</span></label><textarea class="finput" id="b-detail" rows="4" placeholder="Uddybende beskrivelse…"></textarea>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeBModal()">Annuller</button>
+        <button class="btn btn-primary" onclick="saveBiasEntry()">Gem bias</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="del-overlay" id="del-overlay">
+  <div class="del-box">
+    <h3>Slet?</h3><p id="del-text"></p>
+    <div class="del-actions">
+      <button class="btn btn-secondary" onclick="cancelDel()">Annuller</button>
+      <button class="btn btn-danger" onclick="confirmDel()">Slet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Firebase loader (module) ─────────────────────────────────────────── -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+  import { getFirestore, collection, getDocs, doc, getDoc }
+    from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBPbgxc_HH-z6uoReNybEdNEQEt2GeUkwU",
+    authDomain: "interviewopus-92ed4.firebaseapp.com",
+    projectId: "interviewopus-92ed4",
+    storageBucket: "interviewopus-92ed4.firebasestorage.app",
+    messagingSenderId: "479805110021",
+    appId: "1:479805110021:web:107f1dfde5729a73a1a96c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  window.fbLoadMaster = async function() {
+    const [metaSnap, qSnap, gSnap, bSnap] = await Promise.all([
+      getDoc(doc(db, 'master', 'lib')),
+      getDocs(collection(db, 'master/lib/questions')),
+      getDocs(collection(db, 'master/lib/guide')),
+      getDocs(collection(db, 'master/lib/bias')),
+    ]);
+    return {
+      meta: metaSnap.exists() ? metaSnap.data() : {},
+      questions: qSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+      guide:     gSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+      bias:      bSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+    };
+  };
+</script>
+
+<!-- ─── Main app script ──────────────────────────────────────────────────── -->
+<script>
+// ─── Category config ─────────────────────────────────────────────────────────
+const CATS = [
+  { id:'aabning',     label:'Screening på telefon' },
+  { id:'kompetencer', label:'Kompetencer'  },
+  { id:'adfaerd',     label:'Adfærd'       },
+  { id:'resultater',  label:'Resultater'   },
+  { id:'reference',   label:'Referencetjek'},
+];
+const CAT_ORDER = { aabning:0, kompetencer:1, adfaerd:2, resultater:3, reference:4 };
+function catLabel(id) { return (CATS.find(c => c.id === id) || {label: id}).label; }
+
+// ─── Storage keys (lokal scratch) ────────────────────────────────────────────
+const Q_KEY = 'is-qs14';
+const G_KEY = 'is-guide2';
+const B_KEY = 'is-bias3';
+const META_KEY = 'is-master-meta';
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let Qs = [], Guide = [], Bias = [];
+let masterMeta = {};
+let filter = 'all';
+let evNL = 3;
+let qExpanded = {}, gExpanded = {}, bExpanded = {};
+let bNoteEditing = null;
+let qEditId = null, gEditId = null, bEditId = null;
+let selCat = 'kompetencer';
+let pendingDelId = null;
+let dragId = null, dropId = null, ghost = null;
+
+// ─── Map Firestore → in-app shape ────────────────────────────────────────────
+function mapMasterToApp(data) {
+  Qs = data.questions.map(q => ({
+    id: q.id,
+    cat: q.category,
+    order: typeof q.order === 'number' ? q.order : 0,
+    star: false,
+    text: q.text || '',
+    notes: q.notes || ''
+  }));
+  Guide = data.guide.map(g => ({
+    id: g.id,
+    order: typeof g.order === 'number' ? g.order : 0,
+    headline: g.headline || '',
+    short: g.short || '',
+    detail: g.detail || ''
+  }));
+  Bias = data.bias.map(b => ({
+    id: b.id,
+    order: typeof b.order === 'number' ? b.order : 0,
+    headline: b.headline || '',
+    short: b.short || '',
+    detail: b.detail || '',
+    note: ''
+  }));
+  masterMeta = data.meta || {};
+}
+
+// ─── Load: Firestore master + localStorage scratch ──────────────────────────
+async function loadFromFirestore() {
+  const data = await window.fbLoadMaster();
+  mapMasterToApp(data);
+  // Cache i localStorage så reload er hurtigt
+  saveQs(); saveGuide(); saveBiasData();
+  try { localStorage.setItem(META_KEY, JSON.stringify(masterMeta)); } catch(e) {}
+}
+async function load() {
+  // Hvis bruger allerede har lokal cache: brug den (instant).
+  // Master kan tjekkes ved manuel "Hent master" senere.
+  let hasLocal = false;
+  try {
+    const sQ = localStorage.getItem(Q_KEY);
+    const sG = localStorage.getItem(G_KEY);
+    const sB = localStorage.getItem(B_KEY);
+    if (sQ && sG && sB) {
+      Qs = JSON.parse(sQ);
+      Guide = JSON.parse(sG);
+      Bias = JSON.parse(sB);
+      const sM = localStorage.getItem(META_KEY);
+      if (sM) masterMeta = JSON.parse(sM);
+      hasLocal = true;
+    }
+  } catch(e) { hasLocal = false; }
+
+  if (hasLocal) {
+    setStatus('lokal cache');
+    return;
+  }
+
+  // Første gang: hent fra Firestore
+  setStatus('henter master…');
+  await loadFromFirestore();
+  setStatus('master v' + (masterMeta.version || '?'));
+}
+
+function setStatus(text) {
+  const el = document.getElementById('hdr-status');
+  if (el) el.textContent = text;
+}
+
+function saveQs()        { try { localStorage.setItem(Q_KEY, JSON.stringify(Qs)); }    catch(e) {} }
+function saveGuide()     { try { localStorage.setItem(G_KEY, JSON.stringify(Guide)); } catch(e) {} }
+function saveBiasData()  { try { localStorage.setItem(B_KEY, JSON.stringify(Bias)); }  catch(e) {} }
+
+// ─── Sort helpers ────────────────────────────────────────────────────────────
+function sortedQs() {
+  let base;
+  if (filter === 'starred') base = Qs.filter(q => q.star);
+  else if (filter === 'all') base = [...Qs];
+  else base = Qs.filter(q => q.cat === filter);
+  return base.sort((a, b) => {
+    const cd = (CAT_ORDER[a.cat] || 0) - (CAT_ORDER[b.cat] || 0);
+    return cd !== 0 ? cd : a.order - b.order;
+  });
+}
+function starred() { return Qs.filter(q => q.star); }
+function normaliseOrders(cat) {
+  Qs.filter(q => q.cat === cat).sort((a, b) => a.order - b.order).forEach((q, i) => q.order = i);
+}
+
+// ─── Escape ──────────────────────────────────────────────────────────────────
+function esc(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+}
+
+// ─── Render ──────────────────────────────────────────────────────────────────
+function render() { renderQs(); renderChips(); renderPanel(); }
+function renderChips() {
+  const s = starred().length;
+  document.getElementById('cnt-all').textContent       = Qs.length;
+  document.getElementById('cnt-aabning').textContent   = Qs.filter(q => q.cat === 'aabning').length;
+  document.getElementById('cnt-kompetencer').textContent = Qs.filter(q => q.cat === 'kompetencer').length;
+  document.getElementById('cnt-adfaerd').textContent   = Qs.filter(q => q.cat === 'adfaerd').length;
+  document.getElementById('cnt-resultater').textContent = Qs.filter(q => q.cat === 'resultater').length;
+  document.getElementById('cnt-reference').textContent = Qs.filter(q => q.cat === 'reference').length;
+  document.getElementById('cnt-starred').textContent   = s;
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.f === filter);
+  });
+  document.getElementById('tab-q-count').textContent = Qs.length;
+  document.getElementById('tab-g-count').textContent = Guide.length;
+  document.getElementById('tab-b-count').textContent = Bias.length;
+}
+function renderPanel() {
+  const items = starred();
+  const n = items.length;
+  const panelN = document.getElementById('panel-n');
+  panelN.textContent = n;
+  panelN.classList.toggle('has-items', n > 0);
+  const list = document.getElementById('panel-list');
+  if (n === 0) {
+    list.innerHTML = '<div class="panel-empty">★ Markér spørgsmål du vil bruge, og download dem som PDF-guide.</div>';
+  } else {
+    list.innerHTML = items.map((q, i) => `
+      <div class="panel-item">
+        <span class="panel-num">${String(i+1).padStart(2,'0')}</span>
+        <div>
+          <div class="panel-item-text">${esc(q.text.length > 72 ? q.text.slice(0, 69) + '…' : q.text)}</div>
+          <div style="margin-top:3px">${catTagHtml(q.cat)}</div>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('panel-footer').style.display = n > 0 ? 'flex' : 'none';
+}
+function catTagHtml(catId) {
+  const label = catLabel(catId);
+  return `<span class="cat-tag" style="color:var(--cat-${catId}-ink);background:var(--cat-${catId}-bg)">${label}</span>`;
+}
+function renderQs() {
+  const list = document.getElementById('q-list');
+  const qs = sortedQs();
+  if (!qs.length) {
+    const msg = filter === 'starred'
+      ? '<h2>Ingen markerede spørgsmål</h2><p>Tryk ★ for at tilføje spørgsmål til din guide</p>'
+      : '<h2>Ingen spørgsmål her</h2><p>Brug "+ Nyt spørgsmål" for at tilføje</p>';
+    list.innerHTML = `<div class="empty-state">${msg}</div>`;
+    return;
+  }
+  list.innerHTML = '';
+  const showHeaders = filter === 'all' || filter === 'starred';
+  if (showHeaders) {
+    CATS.forEach(cat => {
+      const group = qs.filter(q => q.cat === cat.id);
+      if (!group.length) return;
+      const hd = document.createElement('div');
+      hd.className = 'cat-hd';
+      hd.innerHTML = `<span class="cat-hd-label" style="color:var(--cat-${cat.id}-ink)">${cat.label}</span><div class="cat-hd-line"></div>`;
+      list.appendChild(hd);
+      group.forEach(q => list.appendChild(buildQCard(q, false)));
+    });
+  } else {
+    qs.forEach(q => list.appendChild(buildQCard(q, true)));
+  }
+}
+function buildQCard(q, showCatTag) {
+  const exp = qExpanded[q.id];
+  const div = document.createElement('div');
+  div.className = 'q-card' + (q.star ? ' starred' : '');
+  div.id = 'card-' + q.id;
+  div.dataset.id = q.id;
+  div.dataset.cat = q.cat;
+  div.innerHTML = `
+    <div class="q-inner">
+      <span class="q-handle" title="Træk for at flytte">⠿</span>
+      <button class="q-star${q.star ? ' on' : ''}" data-act="star" data-id="${q.id}" title="${q.star ? 'Fjern markering' : 'Markér til interview'}">★</button>
+      <div class="q-body">
+        <div class="q-text">${esc(q.text)}</div>
+        ${showCatTag ? `<div class="q-meta">${catTagHtml(q.cat)}</div>` : ''}
+      </div>
+      <div class="q-actions">
+        <button class="q-ic" data-act="edit" data-id="${q.id}" title="Rediger">✎</button>
+        <button class="q-ic del" data-act="del" data-id="${q.id}" title="Slet">✕</button>
+        ${q.notes ? `<button class="q-expand-btn${exp ? ' open' : ''}" data-act="expand" data-id="${q.id}">${exp ? '▲' : '▼'}</button>` : ''}
+      </div>
+    </div>
+    ${exp && q.notes ? `
+      <div class="q-listen">
+        <div class="q-listen-lbl">Hvad lytter jeg efter?</div>
+        <div class="q-listen-body">${esc(q.notes)}</div>
+      </div>` : ''}`;
+  div.addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const { act, id } = btn.dataset;
+    if (act === 'star')   { toggleStar(id); }
+    else if (act === 'edit')   { openQEdit(id); }
+    else if (act === 'del')    { askDel('Q:' + id, Qs.find(q=>q.id===id)?.text?.slice(0,80) + '…'); }
+    else if (act === 'expand') { qExpanded[id] = !qExpanded[id]; renderQs(); }
+  });
+  const handle = div.querySelector('.q-handle');
+  handle.addEventListener('mousedown', e => startDrag(e, q.id, false));
+  handle.addEventListener('touchstart', e => startDrag(e, q.id, true), {passive: false});
+  return div;
+}
+
+// ─── Guide render ────────────────────────────────────────────────────────────
+function renderGuide() {
+  const list = document.getElementById('g-list');
+  const intro = list.querySelector('.intro-card');
+  list.innerHTML = '';
+  if (intro) list.appendChild(intro);
+  document.getElementById('g-count-lbl').textContent = Guide.length + ' principper';
+  document.getElementById('tab-g-count').textContent = Guide.length;
+  const sorted = [...Guide].sort((a, b) => a.order - b.order);
+  sorted.forEach((g, i) => {
+    const exp = gExpanded[g.id];
+    const card = document.createElement('div');
+    card.className = 'acc-card' + (exp ? ' open' : '');
+    card.innerHTML = `
+      <div class="acc-top" onclick="toggleG('${g.id}')">
+        <span class="acc-num">${String(i+1).padStart(2,'0')}</span>
+        <div class="acc-summary">
+          <div class="acc-title">${esc(g.headline)}</div>
+          <div class="acc-short">${esc(g.short)}</div>
+        </div>
+        <div class="acc-actions" onclick="event.stopPropagation()">
+          <button class="acc-ic" onclick="openGEdit('${g.id}')" title="Rediger">✎</button>
+          <button class="acc-ic del" onclick="askDel('G:${g.id}','${esc(g.headline)}')" title="Slet">✕</button>
+        </div>
+        <span class="acc-chevron">${exp ? '▲' : '▼'}</span>
+      </div>
+      ${exp && g.detail ? `<div class="acc-detail"><div class="acc-detail-body">${esc(g.detail)}</div></div>` : ''}`;
+    list.appendChild(card);
+  });
+}
+
+// ─── Bias render ─────────────────────────────────────────────────────────────
+function renderBias() {
+  const cards = document.getElementById('b-cards');
+  document.getElementById('b-count-lbl').textContent = Bias.length + ' former for bias';
+  document.getElementById('tab-b-count').textContent = Bias.length;
+  const sorted = [...Bias].sort((a, b) => a.order - b.order);
+  cards.innerHTML = '';
+  sorted.forEach((b, i) => {
+    const exp = bExpanded[b.id];
+    const editing = bNoteEditing === b.id;
+    const card = document.createElement('div');
+    card.className = 'acc-card' + (exp ? ' open' : '');
+    card.id = 'bcard-' + b.id;
+    let noteHtml = '';
+    if (exp) {
+      if (editing) {
+        noteHtml = `
+          <textarea class="note-textarea" id="note-ta-${b.id}" rows="3" placeholder="Dine egne erfaringer med denne bias…">${esc(b.note || '')}</textarea>
+          <div class="note-save-row">
+            <button class="note-btn note-btn-primary" onclick="saveNote('${b.id}')">Gem</button>
+            <button class="note-btn note-btn-ghost" onclick="cancelNote()">Annuller</button>
+          </div>`;
+      } else {
+        noteHtml = `
+          ${b.note ? `<div class="note-display">"${esc(b.note)}"</div>` : ''}
+          <button class="note-edit-btn" onclick="startNote('${b.id}','${(b.note||'').replace(/'/g,"\\'")}')">
+            ${b.note ? '✎ Rediger note' : '✎ Tilføj din note'}
+          </button>`;
+      }
+    }
+    card.innerHTML = `
+      <div class="acc-top" onclick="toggleB('${b.id}')">
+        <span class="acc-num">${String(i+1).padStart(2,'0')}</span>
+        <div class="acc-summary">
+          <div class="acc-title">${esc(b.headline)}</div>
+          <div class="acc-short">${esc(b.short)}</div>
+        </div>
+        ${b.note ? '<span class="acc-note-dot" title="Du har en note her"></span>' : ''}
+        <div class="acc-actions" onclick="event.stopPropagation()">
+          <button class="acc-ic" onclick="openBEdit('${b.id}')" title="Rediger">✎</button>
+          <button class="acc-ic del" onclick="askDel('B:${b.id}','${esc(b.headline)}')" title="Slet">✕</button>
+        </div>
+        <span class="acc-chevron">${exp ? '▲' : '▼'}</span>
+      </div>
+      ${exp ? `<div class="acc-detail">
+        <div class="acc-detail-body">${esc(b.detail)}</div>
+        ${noteHtml}
+      </div>` : ''}`;
+    cards.appendChild(card);
+    if (editing) {
+      setTimeout(() => {
+        const ta = document.getElementById('note-ta-' + b.id);
+        if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+      }, 30);
+    }
+  });
+}
+function toggleG(id) { gExpanded[id] = !gExpanded[id]; renderGuide(); }
+function toggleB(id) { bExpanded[id] = !bExpanded[id]; bNoteEditing = null; renderBias(); }
+function startNote(id, val) { bNoteEditing = id; bExpanded[id] = true; renderBias(); }
+function saveNote(id) {
+  const ta = document.getElementById('note-ta-' + id);
+  if (!ta) return;
+  const b = Bias.find(b => b.id === id);
+  if (b) { b.note = ta.value.trim(); saveBiasData(); }
+  bNoteEditing = null;
+  renderBias();
+}
+function cancelNote() { bNoteEditing = null; renderBias(); }
+
+// ─── Star / filter ───────────────────────────────────────────────────────────
+function toggleStar(id) {
+  const q = Qs.find(q => q.id === id);
+  if (q) { q.star = !q.star; saveQs(); render(); }
+}
+function clearStars() {
+  Qs.forEach(q => q.star = false);
+  if (filter === 'starred') filter = 'all';
+  saveQs(); render();
+}
+function setFilter(f) { filter = f; render(); }
+
+// ─── Tab switching ───────────────────────────────────────────────────────────
+function switchTab(tab) {
+  ['q','g','b'].forEach(t => {
+    const tabEl = document.getElementById('tab-'+t);
+    const secEl = document.getElementById('sec-'+t);
+    if (tabEl) tabEl.classList.toggle('active', t === tab);
+    if (secEl) secEl.classList.toggle('active', t === tab);
+  });
+  const hdrAdd = document.getElementById('hdr-add');
+  const hdrPdf = document.getElementById('hdr-pdf');
+  if (tab === 'q') {
+    hdrAdd.style.display = ''; hdrAdd.textContent = '+ Nyt spørgsmål'; hdrAdd.onclick = openAdd;
+    hdrPdf.style.display = '';
+  } else if (tab === 'g') {
+    hdrAdd.style.display = ''; hdrAdd.textContent = '+ Nyt princip'; hdrAdd.onclick = openAddGuide;
+    hdrPdf.style.display = 'none';
+  } else {
+    hdrAdd.style.display = ''; hdrAdd.textContent = '+ Ny bias'; hdrAdd.onclick = openAddBias;
+    hdrPdf.style.display = 'none';
+  }
+  if (tab === 'g') renderGuide();
+  if (tab === 'b') renderBias();
+}
+
+// ─── Q Modal ─────────────────────────────────────────────────────────────────
+function buildCatGrid() {
+  document.getElementById('cat-grid').innerHTML = CATS.map(c => `
+    <button class="cat-opt${selCat === c.id ? ' sel' : ''}"
+      style="${selCat === c.id ? `border-color:var(--cat-${c.id}-ink);background:var(--cat-${c.id}-bg);color:var(--cat-${c.id}-ink)` : ''}"
+      onclick="pickCat('${c.id}')">${c.label}</button>`).join('');
+}
+function pickCat(id) { selCat = id; buildCatGrid(); }
+function openAdd() {
+  qEditId = null;
+  selCat = (filter !== 'all' && filter !== 'starred') ? filter : 'kompetencer';
+  document.getElementById('q-modal-title').textContent = 'Nyt spørgsmål';
+  document.getElementById('q-text').value = '';
+  document.getElementById('q-notes').value = '';
+  buildCatGrid();
+  document.getElementById('q-overlay').classList.add('on');
+  setTimeout(() => document.getElementById('q-text').focus(), 60);
+}
+function openQEdit(id) {
+  const q = Qs.find(q => q.id === id); if (!q) return;
+  qEditId = id; selCat = q.cat;
+  document.getElementById('q-modal-title').textContent = 'Rediger spørgsmål';
+  document.getElementById('q-text').value = q.text;
+  document.getElementById('q-notes').value = q.notes || '';
+  buildCatGrid();
+  document.getElementById('q-overlay').classList.add('on');
+  setTimeout(() => document.getElementById('q-text').focus(), 60);
+}
+function saveQ() {
+  const text = document.getElementById('q-text').value.trim();
+  const notes = document.getElementById('q-notes').value.trim();
+  if (!text) return;
+  if (qEditId) {
+    const q = Qs.find(q => q.id === qEditId);
+    if (q) { q.text = text; q.notes = notes; q.cat = selCat; }
+  } else {
+    Qs.filter(q => q.cat === selCat).forEach(q => q.order++);
+    Qs.push({ id: 'q' + Date.now(), cat: selCat, order: 0, star: false, text, notes });
+    normaliseOrders(selCat);
+  }
+  saveQs(); closeQModal(); render();
+}
+function closeQModal() { document.getElementById('q-overlay').classList.remove('on'); qEditId = null; }
+
+// ─── Guide Modal ─────────────────────────────────────────────────────────────
+function openAddGuide() {
+  gEditId = null;
+  document.getElementById('g-modal-title').textContent = 'Nyt princip';
+  document.getElementById('g-headline').value = '';
+  document.getElementById('g-short').value = '';
+  document.getElementById('g-detail').value = '';
+  document.getElementById('g-overlay').classList.add('on');
+  setTimeout(() => document.getElementById('g-headline').focus(), 60);
+}
+function openGEdit(id) {
+  const g = Guide.find(g => g.id === id); if (!g) return;
+  gEditId = id;
+  document.getElementById('g-modal-title').textContent = 'Rediger princip';
+  document.getElementById('g-headline').value = g.headline;
+  document.getElementById('g-short').value = g.short;
+  document.getElementById('g-detail').value = g.detail || '';
+  document.getElementById('g-overlay').classList.add('on');
+  setTimeout(() => document.getElementById('g-headline').focus(), 60);
+}
+function saveGuideEntry() {
+  const headline = document.getElementById('g-headline').value.trim();
+  const short = document.getElementById('g-short').value.trim();
+  const detail = document.getElementById('g-detail').value.trim();
+  if (!headline) return;
+  if (gEditId) {
+    const g = Guide.find(g => g.id === gEditId);
+    if (g) { g.headline = headline; g.short = short; g.detail = detail; }
+  } else {
+    Guide.push({ id: 'g' + Date.now(), order: Guide.length, headline, short, detail });
+  }
+  saveGuide(); closeGModal(); renderGuide();
+}
+function closeGModal() { document.getElementById('g-overlay').classList.remove('on'); gEditId = null; }
+
+// ─── Bias Modal ──────────────────────────────────────────────────────────────
+function openAddBias() {
+  bEditId = null;
+  document.getElementById('b-modal-title').textContent = 'Ny bias';
+  document.getElementById('b-name').value = '';
+  document.getElementById('b-short').value = '';
+  document.getElementById('b-detail').value = '';
+  document.getElementById('b-overlay').classList.add('on');
+  setTimeout(() => document.getElementById('b-name').focus(), 60);
+}
+function openBEdit(id) {
+  const b = Bias.find(b => b.id === id); if (!b) return;
+  bEditId = id;
+  document.getElementById('b-modal-title').textContent = 'Rediger bias';
+  document.getElementById('b-name').value = b.headline;
+  document.getElementById('b-short').value = b.short;
+  document.getElementById('b-detail').value = b.detail || '';
+  document.getElementById('b-overlay').classList.add('on');
+  setTimeout(() => document.getElementById('b-name').focus(), 60);
+}
+function saveBiasEntry() {
+  const headline = document.getElementById('b-name').value.trim();
+  const short = document.getElementById('b-short').value.trim();
+  const detail = document.getElementById('b-detail').value.trim();
+  if (!headline) return;
+  if (bEditId) {
+    const b = Bias.find(b => b.id === bEditId);
+    if (b) { b.headline = headline; b.short = short; b.detail = detail; }
+  } else {
+    Bias.push({ id: 'b' + Date.now(), order: Bias.length, headline, short, detail, note: '' });
+  }
+  saveBiasData(); closeBModal(); renderBias();
+}
+function closeBModal() { document.getElementById('b-overlay').classList.remove('on'); bEditId = null; }
+
+// ─── Delete ──────────────────────────────────────────────────────────────────
+function askDel(id, label) {
+  pendingDelId = id;
+  document.getElementById('del-text').textContent = '"' + (label || '').slice(0, 100) + '"';
+  document.getElementById('del-overlay').classList.add('on');
+}
+function cancelDel() { document.getElementById('del-overlay').classList.remove('on'); pendingDelId = null; }
+function confirmDel() {
+  if (!pendingDelId) return;
+  const [type, id] = pendingDelId.split(':');
+  if (type === 'Q') { Qs = Qs.filter(q => q.id !== id); delete qExpanded[id]; saveQs(); render(); }
+  else if (type === 'G') { Guide = Guide.filter(g => g.id !== id); delete gExpanded[id]; saveGuide(); renderGuide(); }
+  else if (type === 'B') { Bias = Bias.filter(b => b.id !== id); delete bExpanded[id]; saveBiasData(); renderBias(); }
+  cancelDel();
+}
+
+// ─── Drag & Drop ─────────────────────────────────────────────────────────────
+function getXY(e, touch) {
+  if (touch) { const t = e.touches[0] || e.changedTouches[0]; return {x: t.clientX, y: t.clientY}; }
+  return {x: e.clientX, y: e.clientY};
+}
+function startDrag(e, id, touch) {
+  e.preventDefault();
+  const {x, y} = getXY(e, touch);
+  dragId = id; dropId = null;
+  const card = document.getElementById('card-' + id);
+  card.classList.add('dragging');
+  ghost = card.cloneNode(true);
+  ghost.className = 'drag-ghost';
+  ghost.style.width = card.offsetWidth + 'px';
+  document.body.appendChild(ghost);
+  posGhost(x, y);
+  if (touch) {
+    window.addEventListener('touchmove', onTouchMove, {passive: false});
+    window.addEventListener('touchend', onTouchEnd, {passive: false});
+  } else {
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }
+}
+function posGhost(x, y) { if (ghost) { ghost.style.left = (x-16)+'px'; ghost.style.top = (y-20)+'px'; } }
+function findTarget(x, y) {
+  if (ghost) ghost.style.display = 'none';
+  const el = document.elementFromPoint(x, y);
+  if (ghost) ghost.style.display = '';
+  return el && el.closest('.q-card:not(.dragging)');
+}
+function updateDrop(x, y) {
+  posGhost(x, y);
+  const tgt = findTarget(x, y);
+  const tid = tgt ? tgt.dataset.id : null;
+  if (tid !== dropId) {
+    if (dropId) document.getElementById('card-'+dropId)?.classList.remove('drag-over');
+    dropId = tid;
+    if (dropId) document.getElementById('card-'+dropId)?.classList.add('drag-over');
+  }
+}
+function onMouseMove(e) { updateDrop(e.clientX, e.clientY); }
+function onTouchMove(e) { e.preventDefault(); const t = e.touches[0]; updateDrop(t.clientX, t.clientY); }
+function endDrag() {
+  ghost?.remove(); ghost = null;
+  if (dragId && dropId && dragId !== dropId) reorder(dragId, dropId);
+  document.querySelectorAll('.q-card').forEach(c => c.classList.remove('dragging', 'drag-over'));
+  dragId = null; dropId = null; renderQs();
+}
+function onMouseUp() { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp); endDrag(); }
+function onTouchEnd() { window.removeEventListener('touchmove', onTouchMove); window.removeEventListener('touchend', onTouchEnd); endDrag(); }
+function reorder(srcId, tgtId) {
+  const src = Qs.find(q => q.id === srcId), tgt = Qs.find(q => q.id === tgtId);
+  if (!src || !tgt || src.cat !== tgt.cat) return;
+  const list = Qs.filter(q => q.cat === src.cat).sort((a, b) => a.order - b.order);
+  const si = list.findIndex(q => q.id === srcId);
+  list.splice(si, 1);
+  const ti = list.findIndex(q => q.id === tgtId);
+  list.splice(ti >= 0 ? ti : list.length, 0, src);
+  list.forEach((q, i) => q.order = i);
+  saveQs();
+}
+
+// ─── PDF / Print ─────────────────────────────────────────────────────────────
+function setNL(n) {
+  evNL = n;
+  document.querySelectorAll('.nl-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === String(n));
+  });
+}
+function showPV() {
+  const selQs = starred().length ? starred() : Qs;
+  const name     = document.getElementById('ev-name')?.value.trim()   || '';
+  const role     = document.getElementById('ev-role')?.value.trim()   || '';
+  const iviewer  = document.getElementById('ev-iewer')?.value.trim()  || '';
+  const dateVal  = document.getElementById('ev-date')?.value.trim()   || new Date().toLocaleDateString('da-DK', {day:'numeric', month:'long', year:'numeric'});
+  const circles = (n=5) => Array.from({length:n}).map(() => '<span class="pdoc-circle"></span>').join('');
+  const noteLines = () => Array.from({length:evNL}).map(() => '<div class="pdoc-note-line"></div>').join('');
+  const dims = ['Screening på telefon','Kompetencer','Adfærd','Resultater'];
+  const grouped = CATS
+    .map(c => ({ cat: c, qs: selQs.filter(q => q.cat === c.id).sort((a,b) => a.order - b.order) }))
+    .filter(g => g.qs.length);
+  let qNum = 0;
+  const questionsHtml = grouped.map(({cat, qs}) =>
+    qs.map(q => {
+      qNum++;
+      return `<div class="pdoc-q-block">
+        <div class="pdoc-q-row">
+          <div class="pdoc-q-num">${String(qNum).padStart(2,'0')}</div>
+          <div class="pdoc-q-text">${esc(q.text)}</div>
+        </div>
+        <div class="pdoc-q-meta">
+          <span class="pdoc-q-cat">${catLabel(q.cat)}</span>
+          <div class="pdoc-rating">${circles(5)}<span class="pdoc-rating-lbl">1 – 5</span></div>
+        </div>
+        <div class="pdoc-note-lines">${noteLines()}</div>
+      </div>`;
+    }).join('')
+  ).join('');
+  const dimsHtml = dims.map(d =>
+    `<div class="pdoc-dim-row">
+      <div class="pdoc-dim-label">${d}</div>
+      <div class="pdoc-rating">${circles(5)}<span class="pdoc-rating-lbl">1 – 5</span></div>
+    </div>`).join('');
+  const recsHtml = ['Afvis','Overvej','Gå videre'].map(r =>
+    `<div class="pdoc-rec-opt"><span class="pdoc-rec-box"></span><div class="pdoc-rec-label">${r}</div></div>`).join('');
+  const overallLines = Array.from({length:5}).map(() => '<div class="pdoc-note-line"></div>').join('');
+  const docHtml = `
+    <div class="pdoc-hdr">
+      <div>
+        ${name ? `<div class="pdoc-name">${esc(name)}</div>` : `<div class="pdoc-name" style="color:rgba(26,25,22,0.25)">Kandidat</div>`}
+        <div class="pdoc-meta">
+          ${role ? `<span>${esc(role)}</span>` : ''}
+          <span>${esc(dateVal)}</span>
+          ${iviewer ? `<span>Interviewer: ${esc(iviewer)}</span>` : ''}
+        </div>
+      </div>
+      <div class="pdoc-brand">Interview Studio · & Dietz</div>
+    </div>
+    <div class="pdoc-sec-lbl">Spørgsmål</div>
+    ${questionsHtml || '<p style="font-size:11pt;color:rgba(26,25,22,0.35);font-style:italic;margin-bottom:16pt">Ingen spørgsmål markeret — viser alle spørgsmål.</p>'}
+    <hr class="pdoc-divider">
+    <div class="pdoc-sec-lbl">Samlet vurdering pr. dimension</div>
+    <div class="pdoc-dims">${dimsHtml}</div>
+    <hr class="pdoc-divider">
+    <div class="pdoc-sec-lbl">Anbefaling</div>
+    <div class="pdoc-rec-row">${recsHtml}</div>
+    <div class="pdoc-sec-lbl">Helhedsindtryk</div>
+    <div class="pdoc-note-lines">${overallLines}</div>
+    <div class="pdoc-footer">
+      <div class="pdoc-footer-text">Dine spørgsmål. Din metode.</div>
+      <div class="pdoc-footer-text">& Dietz · Interview Studio</div>
+    </div>`;
+  document.getElementById('pv-content').innerHTML = docHtml;
+  document.querySelector('.body-wrap').style.display = 'none';
+  document.getElementById('pv').style.display = 'block';
+  document.getElementById('pv').scrollTop = 0;
+  document.body.classList.add('pv-mode');
+}
+function hidePV() {
+  document.getElementById('pv').style.display = 'none';
+  document.querySelector('.body-wrap').style.display = 'flex';
+  document.body.classList.remove('pv-mode');
+}
+
+// ─── Keyboard ────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('del-overlay').classList.contains('on')) cancelDel();
+    else if (document.getElementById('q-overlay').classList.contains('on')) closeQModal();
+    else if (document.getElementById('g-overlay').classList.contains('on')) closeGModal();
+    else if (document.getElementById('b-overlay').classList.contains('on')) closeBModal();
+    else if (document.getElementById('pv').style.display === 'block') hidePV();
+  }
+});
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await load();
+    render();
+    document.getElementById('loading').classList.add('hidden');
+  } catch (err) {
+    console.error('Load error:', err);
+    document.getElementById('loading').innerHTML =
+      '<div class="loading-title">Kunne ikke indlæse</div>' +
+      '<div class="loading-sub">' + (err.message || err) + '</div>' +
+      '<div class="loading-sub" style="margin-top:8px">Prøv at genindlæse siden</div>';
+  }
+});
+</script>
+</body>
+</html>
