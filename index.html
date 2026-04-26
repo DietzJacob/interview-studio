@@ -629,6 +629,37 @@ textarea.finput { resize: vertical; line-height: 1.65; }
       bias:      bSnap.docs.map(d => ({ id: d.id, ...d.data() })),
     };
   };
+
+  // Sync brugerens ændringer til Firestore. type: 'questions'|'guide'|'bias'.
+  // upserts: [{id, data, isNew}]   deletes: [id]
+  window.fbSyncUserDocs = async (uid, type, upserts, deletes) => {
+    if (!upserts.length && !deletes.length) return;
+    const batch = writeBatch(db);
+    const now = serverTimestamp();
+    for (const u of upserts) {
+      const ref = doc(db, `users/${uid}/${type}/${u.id}`);
+      if (u.isNew) {
+        batch.set(ref, {
+          ...u.data,
+          customized: true,
+          sourceId: null,
+          sourceVersion: null,
+          createdAt: now,
+          updatedAt: now
+        });
+      } else {
+        batch.set(ref, {
+          ...u.data,
+          customized: true,
+          updatedAt: now
+        }, { merge: true });
+      }
+    }
+    for (const id of deletes) {
+      batch.delete(doc(db, `users/${uid}/${type}/${id}`));
+    }
+    await batch.commit();
+  };
 </script>
 
 <!-- ─── Main app script ──────────────────────────────────────────────────── -->
@@ -771,6 +802,11 @@ async function loadForUser(user) {
 
   // Cache lokalt for hurtig reload
   saveQs(); saveGuide(); saveBiasData();
+
+  // Byg cloud-snapshot så efterfølgende edits kan diff'es korrekt mod Firestore
+  cloudSnapshot = buildSnapshotFromArrays();
+  _syncDirty = false;
+  clearTimeout(_syncTimer);
 }
 
 function setStatus(text) {
@@ -778,9 +814,129 @@ function setStatus(text) {
   if (el) el.textContent = text;
 }
 
-function saveQs()        { try { localStorage.setItem(Q_KEY, JSON.stringify(Qs)); }    catch(e) {} }
-function saveGuide()     { try { localStorage.setItem(G_KEY, JSON.stringify(Guide)); } catch(e) {} }
-function saveBiasData()  { try { localStorage.setItem(B_KEY, JSON.stringify(Bias)); }  catch(e) {} }
+// ─── Cloud sync (logged-in users) ────────────────────────────────────────────
+// cloudSnapshot afspejler "hvad er gemt i Firestore lige nu" — kun for de bruger-
+// rige felter. null = sync er slået fra (bruger er anonym eller ikke loaded endnu).
+let cloudSnapshot = null;
+let _syncTimer = null;
+let _syncing = false;
+let _syncDirty = false;
+
+function qSig(q) {
+  return {
+    category: q.cat || '',
+    order:    typeof q.order === 'number' ? q.order : 0,
+    starred:  !!q.star,
+    text:     q.text  || '',
+    notes:    q.notes || ''
+  };
+}
+function gSig(g) {
+  return {
+    order:    typeof g.order === 'number' ? g.order : 0,
+    headline: g.headline || '',
+    short:    g.short    || '',
+    detail:   g.detail   || ''
+  };
+}
+function bSig(b) {
+  return {
+    order:    typeof b.order === 'number' ? b.order : 0,
+    headline: b.headline || '',
+    short:    b.short    || '',
+    detail:   b.detail   || '',
+    note:     b.note     || ''
+  };
+}
+function sigEq(a, b) {
+  return a && b && JSON.stringify(a) === JSON.stringify(b);
+}
+function buildSnapshotFromArrays() {
+  return {
+    questions: Object.fromEntries(Qs.map(q    => [q.id, qSig(q)])),
+    guide:     Object.fromEntries(Guide.map(g => [g.id, gSig(g)])),
+    bias:      Object.fromEntries(Bias.map(b  => [b.id, bSig(b)])),
+  };
+}
+
+function diffOne(arr, sigFn, snapMap) {
+  const upserts = [], deletes = [], seen = new Set();
+  for (const item of arr) {
+    seen.add(item.id);
+    const cur = sigFn(item);
+    const prev = snapMap[item.id];
+    if (!sigEq(cur, prev)) {
+      upserts.push({ id: item.id, data: cur, isNew: !prev });
+    }
+  }
+  for (const id of Object.keys(snapMap)) {
+    if (!seen.has(id)) deletes.push(id);
+  }
+  return { upserts, deletes };
+}
+
+function scheduleSync() {
+  if (!currentUser || !cloudSnapshot) return;
+  _syncDirty = true;
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(flushCloudSync, 800);
+}
+
+async function flushCloudSync() {
+  if (!currentUser || !cloudSnapshot) return;
+  if (_syncing) return;             // én sync ad gangen — næste edit re-scheduler
+  if (!_syncDirty) return;
+  _syncDirty = false;
+  _syncing = true;
+
+  const dQ = diffOne(Qs,    qSig, cloudSnapshot.questions);
+  const dG = diffOne(Guide, gSig, cloudSnapshot.guide);
+  const dB = diffOne(Bias,  bSig, cloudSnapshot.bias);
+  const total = dQ.upserts.length + dQ.deletes.length
+              + dG.upserts.length + dG.deletes.length
+              + dB.upserts.length + dB.deletes.length;
+  if (total === 0) { _syncing = false; return; }
+
+  const prevStatus = document.getElementById('hdr-status')?.textContent || '';
+  setStatus('synker… ' + total + ' ændring' + (total > 1 ? 'er' : ''));
+  try {
+    if (dQ.upserts.length || dQ.deletes.length) {
+      await window.fbSyncUserDocs(currentUser.uid, 'questions', dQ.upserts, dQ.deletes);
+      for (const u of dQ.upserts) cloudSnapshot.questions[u.id] = u.data;
+      for (const id of dQ.deletes)  delete cloudSnapshot.questions[id];
+    }
+    if (dG.upserts.length || dG.deletes.length) {
+      await window.fbSyncUserDocs(currentUser.uid, 'guide', dG.upserts, dG.deletes);
+      for (const u of dG.upserts) cloudSnapshot.guide[u.id] = u.data;
+      for (const id of dG.deletes)  delete cloudSnapshot.guide[id];
+    }
+    if (dB.upserts.length || dB.deletes.length) {
+      await window.fbSyncUserDocs(currentUser.uid, 'bias', dB.upserts, dB.deletes);
+      for (const u of dB.upserts) cloudSnapshot.bias[u.id] = u.data;
+      for (const id of dB.deletes)  delete cloudSnapshot.bias[id];
+    }
+    setStatus('synket ✓');
+    setTimeout(() => {
+      // Skift tilbage til normalt status, men kun hvis ingen ny sync er undervejs
+      if (!_syncDirty && !_syncing) setStatus('din kopi · synket');
+    }, 1200);
+  } catch (err) {
+    console.error('Sync error:', err);
+    setStatus('sync fejl — prøver igen');
+    _syncDirty = true;                       // ufærdige ændringer skal med næste gang
+    setTimeout(() => { _syncing = false; scheduleSync(); }, 5000);
+    return;
+  } finally {
+    _syncing = false;
+  }
+
+  // Hvis der er kommet nye edits ind under sync, kør én gang til
+  if (_syncDirty) scheduleSync();
+}
+
+function saveQs()        { try { localStorage.setItem(Q_KEY, JSON.stringify(Qs)); }    catch(e) {} scheduleSync(); }
+function saveGuide()     { try { localStorage.setItem(G_KEY, JSON.stringify(Guide)); } catch(e) {} scheduleSync(); }
+function saveBiasData()  { try { localStorage.setItem(B_KEY, JSON.stringify(Bias)); }  catch(e) {} scheduleSync(); }
 
 // ─── Sort helpers ────────────────────────────────────────────────────────────
 function sortedQs() {
@@ -1456,7 +1612,10 @@ async function handleAuthChange(user) {
       clearLocalCache();
       await loadForUser(user);
     } else {
-      // Logout: ryd brugerens cache, og hent master igen anonymt
+      // Logout: stop sync, ryd brugerens cache, og hent master igen anonymt
+      cloudSnapshot = null;
+      _syncDirty = false;
+      clearTimeout(_syncTimer);
       clearLocalCache();
       await loadAnonymous();
     }
