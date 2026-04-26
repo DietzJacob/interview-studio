@@ -302,6 +302,7 @@ textarea.finput { resize: vertical; line-height: 1.65; }
   </nav>
   <div class="hdr-actions">
     <span class="hdr-status" id="hdr-status" title="Datakilde"></span>
+    <button class="hdr-btn" id="hdr-auth" onclick="openAuthModal()">Log ind</button>
     <button class="hdr-btn" id="hdr-pdf" onclick="showPV()">⎙ Download PDF</button>
     <button class="hdr-btn hdr-btn-primary" id="hdr-add" onclick="openAdd()">+ Nyt spørgsmål</button>
   </div>
@@ -460,11 +461,39 @@ textarea.finput { resize: vertical; line-height: 1.65; }
   </div>
 </div>
 
+<!-- Auth modal -->
+<div class="overlay" id="auth-overlay" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal" style="width:420px">
+    <div class="modal-hdr">
+      <div class="modal-title" id="auth-title">Log ind</div>
+      <button class="modal-close" onclick="closeAuthModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12.5px;color:var(--ink60);line-height:1.6;margin-bottom:16px" id="auth-intro">
+        Log ind eller opret en konto for at gemme dine ændringer på tværs af enheder.
+      </p>
+      <label class="flbl">Email</label>
+      <input class="finput" type="email" id="auth-email" placeholder="dig@example.com" autocomplete="email">
+      <label class="flbl">Adgangskode <span>min. 6 tegn</span></label>
+      <input class="finput" type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+      <div id="auth-error" style="display:none;font-size:12px;color:#c03030;margin-bottom:12px;padding:8px 10px;background:rgba(192,48,48,0.08);border-radius:6px;line-height:1.5"></div>
+      <div class="modal-footer" style="margin-top:8px">
+        <button class="btn btn-secondary" onclick="doSignup()" id="auth-signup-btn">Opret konto</button>
+        <button class="btn btn-primary" onclick="doLogin()" id="auth-login-btn">Log ind</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ─── Firebase loader (module) ─────────────────────────────────────────── -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
   import { getFirestore, collection, getDocs, doc, getDoc }
     from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+  import {
+    getAuth, onAuthStateChanged,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut
+  } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyBPbgxc_HH-z6uoReNybEdNEQEt2GeUkwU",
@@ -475,8 +504,9 @@ textarea.finput { resize: vertical; line-height: 1.65; }
     appId: "1:479805110021:web:107f1dfde5729a73a1a96c"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
+  const auth = getAuth(app);
 
   window.fbLoadMaster = async function() {
     const [metaSnap, qSnap, gSnap, bSnap] = await Promise.all([
@@ -491,6 +521,15 @@ textarea.finput { resize: vertical; line-height: 1.65; }
       guide:     gSnap.docs.map(d => ({ id: d.id, ...d.data() })),
       bias:      bSnap.docs.map(d => ({ id: d.id, ...d.data() })),
     };
+  };
+
+  // ─── Auth API exposed til app-script ──────────────────────────────────
+  window.fbAuth = {
+    signup: (email, pw) => createUserWithEmailAndPassword(auth, email, pw),
+    login:  (email, pw) => signInWithEmailAndPassword(auth, email, pw),
+    logout: () => signOut(auth),
+    onChange: (cb) => onAuthStateChanged(auth, cb),
+    current: () => auth.currentUser
   };
 </script>
 
@@ -1153,12 +1192,106 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// ─── Auth ────────────────────────────────────────────────────────────────────
+let currentUser = null;
+
+function openAuthModal() {
+  if (currentUser) {
+    // Allerede logget ind → log ud i stedet
+    if (confirm('Log ud af ' + currentUser.email + '?')) {
+      window.fbAuth.logout().catch(err => alert('Kunne ikke logge ud: ' + err.message));
+    }
+    return;
+  }
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  hideAuthError();
+  document.getElementById('auth-overlay').classList.add('on');
+  setTimeout(() => document.getElementById('auth-email').focus(), 60);
+}
+function closeAuthModal() {
+  document.getElementById('auth-overlay').classList.remove('on');
+  hideAuthError();
+}
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideAuthError() {
+  document.getElementById('auth-error').style.display = 'none';
+}
+function authBtnsEnabled(on) {
+  document.getElementById('auth-login-btn').disabled = !on;
+  document.getElementById('auth-signup-btn').disabled = !on;
+}
+function translateAuthError(err) {
+  const code = err.code || '';
+  if (code.includes('email-already-in-use')) return 'Den email er allerede registreret. Prøv at logge ind i stedet.';
+  if (code.includes('invalid-email')) return 'Ugyldig email-adresse.';
+  if (code.includes('weak-password')) return 'Adgangskoden skal være mindst 6 tegn.';
+  if (code.includes('user-not-found') || code.includes('invalid-credential') || code.includes('wrong-password'))
+    return 'Forkert email eller adgangskode.';
+  if (code.includes('too-many-requests')) return 'For mange forsøg. Prøv igen om lidt.';
+  if (code.includes('network')) return 'Netværksfejl — tjek din forbindelse.';
+  return err.message || 'Noget gik galt. Prøv igen.';
+}
+async function doLogin() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pw = document.getElementById('auth-password').value;
+  if (!email || !pw) { showAuthError('Udfyld både email og adgangskode.'); return; }
+  hideAuthError();
+  authBtnsEnabled(false);
+  try {
+    await window.fbAuth.login(email, pw);
+    closeAuthModal();
+  } catch (err) {
+    showAuthError(translateAuthError(err));
+  } finally {
+    authBtnsEnabled(true);
+  }
+}
+async function doSignup() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pw = document.getElementById('auth-password').value;
+  if (!email || !pw) { showAuthError('Udfyld både email og adgangskode.'); return; }
+  if (pw.length < 6) { showAuthError('Adgangskoden skal være mindst 6 tegn.'); return; }
+  hideAuthError();
+  authBtnsEnabled(false);
+  try {
+    await window.fbAuth.signup(email, pw);
+    closeAuthModal();
+  } catch (err) {
+    showAuthError(translateAuthError(err));
+  } finally {
+    authBtnsEnabled(true);
+  }
+}
+function updateAuthUI(user) {
+  currentUser = user;
+  const btn = document.getElementById('hdr-auth');
+  if (user) {
+    // Vis email kortet — fx "j…@dietz.dk"
+    const e = user.email || '';
+    const short = e.length > 22 ? e.slice(0, 19) + '…' : e;
+    btn.textContent = short;
+    btn.title = 'Logget ind som ' + e + ' · klik for at logge ud';
+  } else {
+    btn.textContent = 'Log ind';
+    btn.title = 'Log ind eller opret konto';
+  }
+}
+
 // ─── Init ────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     await load();
     render();
     document.getElementById('loading').classList.add('hidden');
+    // Lyt på auth-state
+    if (window.fbAuth) {
+      window.fbAuth.onChange(updateAuthUI);
+    }
   } catch (err) {
     console.error('Load error:', err);
     document.getElementById('loading').innerHTML =
