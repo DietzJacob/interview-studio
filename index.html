@@ -67,6 +67,30 @@ header {
 .hdr-btn-primary { background: var(--ink); color: var(--white); }
 .hdr-btn-primary:hover { background: #333; }
 .hdr-status { font-size: 11px; color: var(--ink30); margin-right: 8px; font-family: var(--mono); }
+/* Admin styling */
+.hdr-btn-admin { background: oklch(48% 0.14 28); color: var(--white); }
+.hdr-btn-admin:hover { background: oklch(42% 0.14 28); color: var(--white); }
+.hdr-btn-admin.active { background: oklch(38% 0.16 28); color: var(--white); }
+#admin-banner {
+  background: oklch(48% 0.14 28); color: var(--white);
+  padding: 8px 20px; font-size: 12px; font-weight: 500;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+#admin-banner.flash-ok { background: oklch(45% 0.13 145); transition: background 0.4s; }
+#admin-banner .banner-icon { font-size: 14px; }
+#admin-banner .banner-text { flex: 1; }
+#admin-banner .banner-exit {
+  padding: 4px 12px; background: rgba(255,255,255,0.18); color: var(--white);
+  border: 1px solid rgba(255,255,255,0.4); border-radius: 5px;
+  font-size: 11px; font-weight: 500; cursor: pointer;
+}
+#admin-banner .banner-exit:hover { background: rgba(255,255,255,0.28); }
+.admin-mode .q-star { display: none !important; }
+.admin-mode .note-edit-btn,
+.admin-mode .note-display,
+.admin-mode .acc-note-dot,
+.admin-mode .note-textarea,
+.admin-mode .note-save-row { display: none !important; }
 /* ── Body wrap ── */
 .body-wrap { flex: 1; display: flex; overflow: hidden; }
 .section { display: none; flex: 1; flex-direction: column; overflow: hidden; }
@@ -302,11 +326,36 @@ textarea.finput { resize: vertical; line-height: 1.65; }
   </nav>
   <div class="hdr-actions">
     <span class="hdr-status" id="hdr-status" title="Datakilde"></span>
+    <button class="hdr-btn hdr-btn-admin" id="hdr-admin" onclick="onClickAdmin()" style="display:none">Master</button>
     <button class="hdr-btn" id="hdr-auth" onclick="openAuthModal()">Log ind</button>
     <button class="hdr-btn" id="hdr-pdf" onclick="showPV()">⎙ Download PDF</button>
     <button class="hdr-btn hdr-btn-primary" id="hdr-add" onclick="openAdd()">+ Nyt spørgsmål</button>
   </div>
 </header>
+
+<div id="admin-banner" style="display:none">
+  <span class="banner-icon">⚠</span>
+  <span class="banner-text" id="admin-banner-text">ADMIN — du redigerer master-biblioteket. Ændringer påvirker alle nye brugere.</span>
+  <button class="banner-exit" onclick="exitAdminMode()">Forlad admin</button>
+</div>
+
+<!-- Admin confirmation modal -->
+<div class="overlay" id="admin-overlay" onclick="if(event.target===this)closeAdminConfirm()">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-hdr">
+      <span class="modal-title" id="admin-confirm-title">Skifte til admin?</span>
+      <button class="modal-close" onclick="closeAdminConfirm()">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="admin-confirm-text" style="font-size:13px;line-height:1.6;color:var(--ink70);margin:0 0 12px"></p>
+      <p style="font-size:11px;line-height:1.5;color:var(--ink40);margin:0 0 4px">Browser-refresh nulstiller automatisk til normal tilstand.</p>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAdminConfirm()">Annullér</button>
+        <button class="btn btn-primary" id="admin-confirm-ok" onclick="confirmAdminChoice()">Skift til admin</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- PDF view lives outside body-wrap so body-wrap:none doesn't hide it -->
 <div id="pv">
@@ -660,6 +709,35 @@ textarea.finput { resize: vertical; line-height: 1.65; }
     }
     await batch.commit();
   };
+
+  // Tjek om en bruger er admin (har et doc i admins/{uid})
+  window.fbCheckIsAdmin = async (uid) => {
+    if (!uid) return false;
+    try {
+      const snap = await getDoc(doc(db, 'admins', uid));
+      return snap.exists();
+    } catch(e) { return false; }
+  };
+
+  // Sync ændringer til master/lib/{type}/{id}. KUN admins har skriverettigheder
+  // pga. Firestore-rules. type: 'questions'|'guide'|'bias'.
+  window.fbSyncMasterDocs = async (type, upserts, deletes) => {
+    if (!upserts.length && !deletes.length) return;
+    const batch = writeBatch(db);
+    const now = serverTimestamp();
+    for (const u of upserts) {
+      const ref = doc(db, `master/lib/${type}/${u.id}`);
+      if (u.isNew) {
+        batch.set(ref, { ...u.data, createdAt: now, updatedAt: now });
+      } else {
+        batch.set(ref, { ...u.data, updatedAt: now }, { merge: true });
+      }
+    }
+    for (const id of deletes) {
+      batch.delete(doc(db, `master/lib/${type}/${id}`));
+    }
+    await batch.commit();
+  };
 </script>
 
 <!-- ─── Main app script ──────────────────────────────────────────────────── -->
@@ -807,6 +885,44 @@ async function loadForUser(user) {
   cloudSnapshot = buildSnapshotFromArrays();
   _syncDirty = false;
   clearTimeout(_syncTimer);
+
+  // Tjek admin-status og opdater header
+  isAdmin = await window.fbCheckIsAdmin(user.uid);
+  updateAdminUI();
+}
+
+// Hent master direkte til app-state (bruges når admin går i admin-mode)
+async function loadForAdmin() {
+  setStatus('henter master til redigering…');
+  const data = await window.fbLoadMaster();
+  Qs = data.questions.map(q => ({
+    id: q.id,
+    cat: q.category,
+    order: typeof q.order === 'number' ? q.order : 0,
+    star: false,                   // ignoreres i admin-mode
+    text: q.text || '',
+    notes: q.notes || ''
+  }));
+  Guide = data.guide.map(g => ({
+    id: g.id,
+    order: typeof g.order === 'number' ? g.order : 0,
+    headline: g.headline || '',
+    short: g.short || '',
+    detail: g.detail || ''
+  }));
+  Bias = data.bias.map(b => ({
+    id: b.id,
+    order: typeof b.order === 'number' ? b.order : 0,
+    headline: b.headline || '',
+    short: b.short || '',
+    detail: b.detail || '',
+    note: ''                        // skjult i admin-mode
+  }));
+  masterMeta = data.meta || {};
+
+  // Snapshot bygges efter adminMode er sat (i enterAdminMode), så bSig/qSig
+  // bruger admin-shape (uden starred/note).
+  setStatus('master v' + (masterMeta.version || '?') + ' · ADMIN');
 }
 
 function setStatus(text) {
@@ -822,14 +938,21 @@ let _syncTimer = null;
 let _syncing = false;
 let _syncDirty = false;
 
+// Admin mode state
+let isAdmin = false;       // brugeren har et doc i admins/{uid}
+let adminMode = false;     // brugeren har aktivt skiftet til admin-tilstand
+
+// Mode-aware signaturer: i admin-mode skriver vi til master, hvor 'starred'
+// (bruger-only) og bias 'note' (bruger-only) ikke hører hjemme.
 function qSig(q) {
-  return {
+  const sig = {
     category: q.cat || '',
     order:    typeof q.order === 'number' ? q.order : 0,
-    starred:  !!q.star,
     text:     q.text  || '',
     notes:    q.notes || ''
   };
+  if (!adminMode) sig.starred = !!q.star;
+  return sig;
 }
 function gSig(g) {
   return {
@@ -840,13 +963,14 @@ function gSig(g) {
   };
 }
 function bSig(b) {
-  return {
+  const sig = {
     order:    typeof b.order === 'number' ? b.order : 0,
     headline: b.headline || '',
     short:    b.short    || '',
-    detail:   b.detail   || '',
-    note:     b.note     || ''
+    detail:   b.detail   || ''
   };
+  if (!adminMode) sig.note = b.note || '';
+  return sig;
 }
 function sigEq(a, b) {
   return a && b && JSON.stringify(a) === JSON.stringify(b);
@@ -897,28 +1021,33 @@ async function flushCloudSync() {
               + dB.upserts.length + dB.deletes.length;
   if (total === 0) { _syncing = false; return; }
 
-  const prevStatus = document.getElementById('hdr-status')?.textContent || '';
+  const targetLabel = adminMode ? 'master' : 'din kopi';
   setStatus('synker… ' + total + ' ændring' + (total > 1 ? 'er' : ''));
   try {
+    // Route til master eller users baseret på adminMode
+    const sync = adminMode
+      ? (type, u, d) => window.fbSyncMasterDocs(type, u, d)
+      : (type, u, d) => window.fbSyncUserDocs(currentUser.uid, type, u, d);
+
     if (dQ.upserts.length || dQ.deletes.length) {
-      await window.fbSyncUserDocs(currentUser.uid, 'questions', dQ.upserts, dQ.deletes);
+      await sync('questions', dQ.upserts, dQ.deletes);
       for (const u of dQ.upserts) cloudSnapshot.questions[u.id] = u.data;
       for (const id of dQ.deletes)  delete cloudSnapshot.questions[id];
     }
     if (dG.upserts.length || dG.deletes.length) {
-      await window.fbSyncUserDocs(currentUser.uid, 'guide', dG.upserts, dG.deletes);
+      await sync('guide', dG.upserts, dG.deletes);
       for (const u of dG.upserts) cloudSnapshot.guide[u.id] = u.data;
       for (const id of dG.deletes)  delete cloudSnapshot.guide[id];
     }
     if (dB.upserts.length || dB.deletes.length) {
-      await window.fbSyncUserDocs(currentUser.uid, 'bias', dB.upserts, dB.deletes);
+      await sync('bias', dB.upserts, dB.deletes);
       for (const u of dB.upserts) cloudSnapshot.bias[u.id] = u.data;
       for (const id of dB.deletes)  delete cloudSnapshot.bias[id];
     }
-    setStatus('synket ✓');
+    setStatus(adminMode ? 'synket til master ✓' : 'synket ✓');
+    flashAdminBanner();
     setTimeout(() => {
-      // Skift tilbage til normalt status, men kun hvis ingen ny sync er undervejs
-      if (!_syncDirty && !_syncing) setStatus('din kopi · synket');
+      if (!_syncDirty && !_syncing) setStatus(targetLabel + ' · synket');
     }, 1200);
   } catch (err) {
     console.error('Sync error:', err);
@@ -1582,6 +1711,121 @@ function updateAuthUI(user) {
   }
 }
 
+// ─── Admin mode ──────────────────────────────────────────────────────────────
+function updateAdminUI() {
+  const btn = document.getElementById('hdr-admin');
+  if (!btn) return;
+  if (isAdmin) {
+    btn.style.display = '';
+    btn.textContent = adminMode ? 'Forlad admin' : 'Master';
+    btn.classList.toggle('active', adminMode);
+    btn.title = adminMode
+      ? 'Forlad admin-tilstand og vend tilbage til din egen kopi'
+      : 'Skift til admin-tilstand og rediger master-biblioteket';
+  } else {
+    btn.style.display = 'none';
+  }
+  document.body.classList.toggle('admin-mode', adminMode);
+  const banner = document.getElementById('admin-banner');
+  if (banner) {
+    banner.style.display = adminMode ? 'flex' : 'none';
+    const txt = document.getElementById('admin-banner-text');
+    if (txt) {
+      const v = (masterMeta && masterMeta.version) || '?';
+      txt.textContent = 'ADMIN — du redigerer master v' + v + '. Ændringer påvirker alle nye brugere.';
+    }
+  }
+}
+
+function flashAdminBanner() {
+  if (!adminMode) return;
+  const banner = document.getElementById('admin-banner');
+  if (!banner) return;
+  banner.classList.add('flash-ok');
+  setTimeout(() => banner.classList.remove('flash-ok'), 800);
+}
+
+function onClickAdmin() {
+  if (!isAdmin) return;
+  if (adminMode) {
+    // Allerede i admin — knap fungerer som "Forlad admin"
+    exitAdminMode();
+  } else {
+    openAdminConfirm();
+  }
+}
+
+function openAdminConfirm() {
+  const v = (masterMeta && masterMeta.version) || '?';
+  document.getElementById('admin-confirm-title').textContent = 'Skifte til admin?';
+  document.getElementById('admin-confirm-text').textContent =
+    'Du er ved at skifte til admin-tilstand. Dine ændringer går direkte til master-biblioteket (v' + v + ') og påvirker alle nye brugere der opretter konto efter dette tidspunkt. Eksisterende brugere er ikke påvirket.';
+  document.getElementById('admin-confirm-ok').textContent = 'Skift til admin';
+  document.getElementById('admin-overlay').classList.add('on');
+}
+function closeAdminConfirm() {
+  document.getElementById('admin-overlay').classList.remove('on');
+}
+function confirmAdminChoice() {
+  closeAdminConfirm();
+  enterAdminMode();
+}
+
+async function enterAdminMode() {
+  if (!isAdmin || adminMode) return;
+  // Flush eventuel ventende user-sync først, så ingenting går tabt
+  clearTimeout(_syncTimer);
+  if (_syncDirty && currentUser && cloudSnapshot) {
+    try { await flushCloudSync(); } catch(e) {}
+  }
+  document.getElementById('loading').classList.remove('hidden');
+  try {
+    cloudSnapshot = null;        // master-snapshot bygges efter loadForAdmin
+    _syncDirty = false;
+    adminMode = true;            // VIGTIGT: sættes FØR loadForAdmin så sigs er korrekte
+    await loadForAdmin();
+    cloudSnapshot = buildSnapshotFromArrays();
+    updateAdminUI();
+    render();
+  } catch (err) {
+    console.error('Enter admin error:', err);
+    adminMode = false;
+    cloudSnapshot = null;
+    alert('Kunne ikke indlæse master: ' + (err.message || err));
+    if (currentUser) await loadForUser(currentUser);
+    render();
+  } finally {
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
+async function exitAdminMode() {
+  if (!adminMode) return;
+  // Flush ventende master-sync først
+  clearTimeout(_syncTimer);
+  if (_syncDirty && cloudSnapshot) {
+    try { await flushCloudSync(); } catch(e) {}
+  }
+  document.getElementById('loading').classList.remove('hidden');
+  try {
+    adminMode = false;
+    cloudSnapshot = null;
+    _syncDirty = false;
+    clearLocalCache();
+    if (currentUser) {
+      await loadForUser(currentUser);
+    } else {
+      await loadAnonymous();
+    }
+    updateAdminUI();
+    render();
+  } catch (err) {
+    console.error('Exit admin error:', err);
+  } finally {
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
 // ─── Auth-aware data reload ──────────────────────────────────────────────────
 let _lastAuthUid = null;
 
@@ -1617,6 +1861,10 @@ async function handleAuthChange(user) {
       _syncDirty = false;
       clearTimeout(_syncTimer);
       clearLocalCache();
+      // Reset admin-tilstand — Master-knap forsvinder ved logout
+      adminMode = false;
+      isAdmin = false;
+      updateAdminUI();
       await loadAnonymous();
     }
     render();
@@ -1648,6 +1896,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     _lastAuthUid = initialUser ? initialUser.uid : null;
 
     render();
+    // Sørg for at Master-knappen vises hvis brugeren er admin
+    updateAdminUI();
     document.getElementById('loading').classList.add('hidden');
 
     // Lyt på fremtidige auth-ændringer (login/logout under sessionen)
