@@ -229,6 +229,16 @@ header {
 .intro-card { margin-bottom: 14px; padding: 16px 20px; background: var(--card); border-radius: 10px; border: 1px solid var(--ink10); }
 .intro-card-title { font-family: var(--display); font-size: 18px; font-weight: 500; margin-bottom: 5px; }
 .intro-card-body  { font-size: 12px; color: var(--ink60); line-height: 1.72; }
+.intro-card-body p { margin: 0 0 8px; }
+.intro-card-body p:last-of-type { margin-bottom: 0; }
+.intro-card-sig {
+  font-size: 12px; color: var(--ink40); font-style: italic;
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--ink05);
+}
+.intro-card.is-manifest { padding: 18px 22px; }
+.intro-card.is-manifest .intro-card-body { font-size: 13px; line-height: 1.72; color: var(--ink70); }
+/* Hero placement på Spørgsmål-fanen — full width over q-stereo */
+.q-hero { margin: 14px 20px 0; }
 .acc-card { margin-bottom: 5px; border-radius: 10px; overflow: hidden; border: 1px solid var(--ink10); background: var(--card); transition: border-color 0.15s; }
 .acc-card.open { border-color: var(--ink15); }
 .acc-top { display: flex; gap: 12px; align-items: flex-start; padding: 13px 16px; cursor: pointer; }
@@ -354,7 +364,7 @@ textarea.finput { resize: vertical; line-height: 1.65; }
   </div>
   <nav class="hdr-tabs">
     <button class="hdr-tab active" id="tab-q" onclick="switchTab('q')">Spørgsmål <span class="tab-count" id="tab-q-count">0</span></button>
-    <button class="hdr-tab" id="tab-g" onclick="switchTab('g')">Interviewguide <span class="tab-count" id="tab-g-count">0</span></button>
+    <button class="hdr-tab" id="tab-g" onclick="switchTab('g')">Metode <span class="tab-count" id="tab-g-count">0</span></button>
     <button class="hdr-tab" id="tab-b" onclick="switchTab('b')">Bias <span class="tab-count" id="tab-b-count">0</span></button>
   </nav>
   <div class="hdr-actions">
@@ -462,6 +472,17 @@ textarea.finput { resize: vertical; line-height: 1.65; }
 <div class="body-wrap">
   <!-- Questions -->
   <section class="section active" id="sec-q">
+    <div class="q-hero">
+      <div class="intro-card is-manifest">
+        <div class="intro-card-body">
+          <p>Spørgsmålene her er bygget af tusindvis af samtaler. Både mine egne og dem jeg har sparret med ledere om.</p>
+          <p>De er valgt fordi de får samtalerne ud over flosklerne og ind i det konkrete.</p>
+          <p>Det er en startpakke. En samtale er aldrig en liste af forudbestemte spørgsmål, den er en organisk proces, hvor det ene spørgsmål fører til det næste, drevet af hvad kandidaten faktisk siger.</p>
+          <p>Markér det der giver mening for rollen. Tag arket med som en pejling, ikke et manuskript. Stil færre spørgsmål end du tror, og gå dybere end du plejer. Og lyt mere end du taler.</p>
+        </div>
+        <div class="intro-card-sig">— Jacob</div>
+      </div>
+    </div>
     <div class="q-stereo">
       <!-- Left: candidate setup panel -->
       <div class="setup-panel">
@@ -522,9 +543,13 @@ textarea.finput { resize: vertical; line-height: 1.65; }
       <button class="chip-add" onclick="openAddGuide()">+ Nyt princip</button>
     </div>
     <div class="section-list" id="g-list">
-      <div class="intro-card">
-        <div class="intro-card-title">Greatest Hits</div>
-        <div class="intro-card-body">De her principper er ikke teori. De er destilleret fra samtaler med over 20 erfarne ledere og egne erfaringer fra tusindvis af timer i rekrutteringsrummet. Brug dem som tjekliste inden, refleksion efter, eller som en reminder om hvad der faktisk gør forskellen.</div>
+      <div class="intro-card is-manifest">
+        <div class="intro-card-body">
+          <p>Det her er ikke en HR-manual. Der findes ikke én rigtig metode til at interviewe.</p>
+          <p>Men der findes mønstre og greb, der går igen hos dem der har ansat mange, lavet fejlansættelser, og justeret deres praksis fordi virkeligheden tvang dem til det. Indsigterne her bygger på mit arbejde gennem samtaler og en serie interviews med 20 erfarne ledere.</p>
+          <p>Læs dem ikke som regler, men som ægte indsigter. Brug det der giver mening, lad resten ligge.</p>
+        </div>
+        <div class="intro-card-sig">— Jacob</div>
       </div>
     </div>
   </section>
@@ -538,9 +563,13 @@ textarea.finput { resize: vertical; line-height: 1.65; }
       <button class="chip-add" onclick="openAddBias()">+ Ny bias</button>
     </div>
     <div class="section-list" id="b-list">
-      <div class="intro-card">
-        <div class="intro-card-title">Mennesketyper, personlighedstræk og bias</div>
-        <div class="intro-card-body">Vi bliver aldrig fri for bias. Det er et menneskeligt vilkår. Pointen er at blive mere bevidst. Ikke perfekt.</div>
+      <div class="intro-card is-manifest">
+        <div class="intro-card-body">
+          <p>Vi har alle bias. Det er ikke en svaghed — det er sådan hjernen fungerer. Mentale genveje der får os igennem hverdagen.</p>
+          <p>Problemet er at de samme genveje får alt for meget vægt i et interview, hvor informationen er begrænset og konsekvensen af fejl høj. I situationen føles det som erfaring. Som intuition. Som sund fornuft. Det er først bagefter man ser at man var farvet.</p>
+          <p>Pointen er ikke at eliminere dine bias. Pointen er at gøre dem synlige nok til at de ikke får lov at styre alene. Læs dem her, og brug noterne til at skrive ned hvor du selv genkender dig.</p>
+        </div>
+        <div class="intro-card-sig">— Jacob</div>
       </div>
       <div id="b-cards"></div>
     </div>
@@ -2204,7 +2233,7 @@ function openUpdatePreview() {
   body.innerHTML = '';
   const sections = [
     { type: 'questions', label: 'Spørgsmål', arr: Qs, getLabel: q => q.text },
-    { type: 'guide', label: 'Interviewguide', arr: Guide, getLabel: g => g.headline },
+    { type: 'guide', label: 'Metode', arr: Guide, getLabel: g => g.headline },
     { type: 'bias', label: 'Bias', arr: Bias, getLabel: b => b.headline }
   ];
   for (const sec of sections) {
