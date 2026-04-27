@@ -66,7 +66,7 @@ header {
 .hdr-btn:hover { background: var(--ink15); color: var(--ink); }
 .hdr-btn-primary { background: var(--ink); color: var(--white); }
 .hdr-btn-primary:hover { background: #333; }
-.hdr-status { font-size: 11px; color: var(--ink30); margin-right: 8px; font-family: var(--mono); white-space: nowrap; }
+.hdr-status { font-size: 11px; color: var(--ink30); margin-right: 8px; font-family: var(--mono); }
 /* Admin styling */
 .hdr-btn-admin { background: oklch(48% 0.14 28); color: var(--white); }
 .hdr-btn-admin:hover { background: oklch(42% 0.14 28); color: var(--white); }
@@ -130,9 +130,9 @@ header {
 .section.active { display: flex; }
 /* ── Chip toolbar ── */
 .chip-toolbar {
-  padding: 12px 20px;
+  padding: 10px 20px; border-bottom: 1px solid var(--ink10);
   display: flex; gap: 5px; align-items: center; flex-wrap: wrap;
-  background: transparent; flex-shrink: 0;
+  background: var(--card); flex-shrink: 0;
 }
 .chip {
   display: flex; align-items: center; gap: 5px;
@@ -157,11 +157,11 @@ header {
 .q-main { flex: 1; overflow-y: auto; padding: 14px 20px; }
 /* ── Setup panel (left of questions) ── */
 .setup-panel {
-  width: 220px; flex-shrink: 0;
-  background: transparent; overflow-y: auto; padding: 20px 18px;
+  width: 220px; flex-shrink: 0; border-right: 1px solid var(--ink10);
+  background: var(--card); overflow-y: auto; padding: 20px 18px;
   display: flex; flex-direction: column; gap: 0;
 }
-.setup-panel-lbl { font-family: var(--display); font-style: italic; font-size: 16px; font-weight: 500; color: var(--ink60); margin-bottom: 14px; letter-spacing: 0; text-transform: none; }
+.setup-panel-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink30); margin-bottom: 12px; }
 .setup-field { margin-bottom: 10px; }
 .setup-field label { display: block; font-size: 11px; font-weight: 500; color: var(--ink60); margin-bottom: 4px; }
 .setup-field input { width: 100%; padding: 7px 10px; border-radius: 7px; border: 1.5px solid var(--ink10); font-size: 12px; font-family: var(--sans); outline: none; background: var(--white); color: var(--ink); transition: border-color 0.15s; }
@@ -174,7 +174,7 @@ header {
 /* ── Question card ── */
 .q-card {
   margin-bottom: 5px; border-radius: 9px; overflow: hidden;
-  border: 1px solid var(--ink05); background: var(--card); transition: border-color 0.12s;
+  border: 1.5px solid var(--ink10); background: var(--card); transition: border-color 0.12s;
   touch-action: none;
 }
 .q-card.starred { border-color: var(--ink15); background: #f5f4f2; }
@@ -196,17 +196,16 @@ header {
 .q-ic.del:hover { border-color: #c03030; color: #c03030; }
 .cat-tag { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; white-space: nowrap; display: inline-block; }
 .q-listen { border-top: 1px solid var(--ink10); padding: 11px 12px 13px 37px; background: var(--warm); }
-.q-listen-lbl { font-family: var(--display); font-style: italic; font-size: 14px; font-weight: 500; color: var(--ink60); margin-bottom: 6px; letter-spacing: 0; text-transform: none; }
+.q-listen-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink30); margin-bottom: 6px; }
 .q-listen-body { font-size: 12px; color: var(--ink60); line-height: 1.72; white-space: pre-line; }
-.cat-hd { display: flex; align-items: center; gap: 10px; margin: 22px 0 10px; padding: 0 2px; }
-.cat-hd:first-child { margin-top: 4px; }
-.cat-hd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.cat-hd-label { font-family: var(--display); font-style: italic; font-size: 20px; font-weight: 500; letter-spacing: 0; text-transform: none; line-height: 1.1; }
-.cat-hd-line { display: none; }
+.cat-hd { display: flex; align-items: center; gap: 9px; margin: 16px 0 7px; padding: 0 2px; }
+.cat-hd:first-child { margin-top: 0; }
+.cat-hd-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.cat-hd-line { flex: 1; height: 1px; background: var(--ink10); }
 /* ── Right panel (questions) ── */
-.q-panel { width: 228px; display: flex; flex-direction: column; flex-shrink: 0; background: transparent; }
-.panel-hdr { padding: 14px 16px 12px; flex-shrink: 0; }
-.panel-hdr-lbl { font-family: var(--display); font-style: italic; font-size: 16px; font-weight: 500; color: var(--ink60); margin-bottom: 5px; letter-spacing: 0; text-transform: none; }
+.q-panel { width: 228px; border-left: 1px solid var(--ink10); display: flex; flex-direction: column; flex-shrink: 0; background: var(--card); }
+.panel-hdr { padding: 14px 16px 12px; border-bottom: 1px solid var(--ink10); flex-shrink: 0; }
+.panel-hdr-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink30); margin-bottom: 4px; }
 .panel-count { display: flex; align-items: baseline; gap: 6px; }
 .panel-n { font-family: var(--display); font-size: 32px; font-weight: 500; line-height: 1; color: var(--ink15); transition: color 0.2s; }
 .panel-n.has-items { color: var(--accent); }
@@ -216,14 +215,14 @@ header {
 .panel-item { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--ink05); align-items: flex-start; }
 .panel-num { font-family: var(--mono); font-size: 10px; color: var(--ink30); flex-shrink: 0; margin-top: 2px; }
 .panel-item-text { font-size: 12px; line-height: 1.5; color: var(--ink); }
-.panel-footer { padding: 12px 14px; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+.panel-footer { padding: 10px 14px; border-top: 1px solid var(--ink10); display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
 .panel-btn { padding: 8px; border: none; border-radius: 7px; font-family: var(--sans); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
 .panel-btn-primary { background: var(--ink); color: var(--white); }
 .panel-btn-primary:hover { background: #333; }
 .panel-btn-ghost { background: none; color: var(--ink30); border: 1px solid var(--ink10); }
 .panel-btn-ghost:hover { border-color: var(--ink30); color: var(--ink60); }
 /* ── Guide & Bias ── */
-.section-sub-hdr { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; background: transparent; flex-shrink: 0; }
+.section-sub-hdr { padding: 11px 20px; border-bottom: 1px solid var(--ink10); display: flex; align-items: center; justify-content: space-between; background: var(--card); flex-shrink: 0; }
 .section-sub-hdr-info .sub-count { font-size: 13px; font-weight: 500; }
 .section-sub-hdr-info .sub-hint  { font-size: 12px; color: var(--ink30); margin-top: 1px; }
 .section-list { flex: 1; overflow-y: auto; padding: 14px 20px; }
@@ -236,11 +235,8 @@ header {
   font-size: 12px; color: var(--ink40); font-style: italic;
   margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--ink05);
 }
-.intro-card.is-manifest { padding: 22px 26px; background: var(--card); border: 1px solid var(--ink05); }
-.intro-card.is-manifest .intro-card-body { font-family: var(--display); font-size: 17px; line-height: 1.55; color: var(--ink); font-weight: 400; }
-.intro-card.is-manifest .intro-card-body p { margin: 0 0 12px; }
-.intro-card.is-manifest .intro-card-body p:last-of-type { margin-bottom: 0; }
-.intro-card.is-manifest .intro-card-sig { font-family: var(--display); font-style: italic; font-size: 15px; color: var(--ink60); border-top: none; padding-top: 14px; margin-top: 14px; }
+.intro-card.is-manifest { padding: 18px 22px; }
+.intro-card.is-manifest .intro-card-body { font-size: 13px; line-height: 1.72; color: var(--ink70); }
 /* Hero placement på Spørgsmål-fanen — full width over q-stereo */
 .q-hero { margin: 14px 20px 0; }
 .acc-card { margin-bottom: 5px; border-radius: 10px; overflow: hidden; border: 1px solid var(--ink10); background: var(--card); transition: border-color 0.15s; }
@@ -1357,7 +1353,7 @@ function renderQs() {
       if (!group.length) return;
       const hd = document.createElement('div');
       hd.className = 'cat-hd';
-      hd.innerHTML = `<span class="cat-hd-dot" style="background:var(--cat-${cat.id}-ink)"></span><span class="cat-hd-label" style="color:var(--cat-${cat.id}-ink)">${cat.label}</span>`;
+      hd.innerHTML = `<span class="cat-hd-label" style="color:var(--cat-${cat.id}-ink)">${cat.label}</span><div class="cat-hd-line"></div>`;
       list.appendChild(hd);
       group.forEach(q => list.appendChild(buildQCard(q, false)));
     });
