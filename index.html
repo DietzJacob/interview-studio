@@ -4,33 +4,73 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Interview Studio · & Dietz</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400;1,8..60,500&family=Caveat:wght@500;600&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --ink:   #1a1916;
-  --ink70: rgba(26,25,22,0.70);
-  --ink60: rgba(26,25,22,0.60);
-  --ink40: rgba(26,25,22,0.40);
-  --ink30: rgba(26,25,22,0.30);
-  --ink15: rgba(26,25,22,0.15);
-  --ink10: rgba(26,25,22,0.08);
-  --ink05: rgba(26,25,22,0.04);
+  /* ── Nye design-tokens (Mellem) ────────────────────────────────────────── */
+  --paper-50:  #FDFAF3;
+  --paper-100: #FBF7EE;
+  --paper-200: #F7F2E8;
+  --paper-300: #EFE8DA;
+  --paper-400: #E4DBC7;
+  --paper-500: #C9BFA8;
+
+  --ink-900: #1A1611;
+  --ink-700: #3A332A;
+  --ink-500: #6B6356;
+  --ink-400: #8A8275;
+  --ink-300: #B8B0A0;
+
+  --rust:        oklch(0.56 0.13 38);
+  --rust-soft:   oklch(0.92 0.04 50);
+  --forest:      oklch(0.42 0.06 150);
+  --forest-soft: oklch(0.93 0.03 145);
+  --ochre:       oklch(0.72 0.10 75);
+  --plum:        oklch(0.42 0.08 350);
+
+  --surface:     #FFFFFF;
+  --surface-2:   var(--paper-200);
+  --border:      var(--paper-400);
+  --border-soft: var(--paper-300);
+
+  --font-display: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+  --font-ui:      'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  --font-hand:    'Caveat', 'Bradley Hand', cursive;
+
+  --shadow-1: 0 1px 0 rgba(26,22,17,0.04), 0 1px 2px rgba(26,22,17,0.04);
+  --shadow-2: 0 1px 0 rgba(26,22,17,0.05), 0 4px 12px rgba(26,22,17,0.06);
+  --shadow-3: 0 2px 0 rgba(26,22,17,0.05), 0 12px 30px rgba(26,22,17,0.08);
+
+  /* ── Bagudkompatible alias (så eksisterende CSS fortsat virker) ────────── */
+  --ink:   #1A1611;
+  --ink70: rgba(26,22,17,0.70);
+  --ink60: rgba(26,22,17,0.60);
+  --ink40: rgba(26,22,17,0.40);
+  --ink30: rgba(26,22,17,0.30);
+  --ink15: rgba(26,22,17,0.15);
+  --ink10: rgba(26,22,17,0.08);
+  --ink05: rgba(26,22,17,0.04);
   --white: #ffffff;
-  --bg:    #f7f5f2;
-  --card:  #fefefe;
-  --accent:  oklch(52% 0.14 38);
-  --warm:    oklch(97.5% 0.004 60);
-  --display: 'Cormorant Garamond', Georgia, serif;
-  --sans:    'IBM Plex Sans', system-ui, sans-serif;
-  --mono:    'IBM Plex Mono', monospace;
+  --bg:    var(--paper-100);
+  --card:  var(--surface);
+  --accent:  var(--rust);
+  --warm:    var(--paper-50);
+  --display: var(--font-display);
+  --sans:    var(--font-ui);
+  --mono:    var(--font-mono);
+
+  /* Kategori-farver bevares */
   --cat-aabning-ink:     oklch(38% 0.07 230); --cat-aabning-bg:     oklch(94% 0.03 230);
   --cat-kompetencer-ink: oklch(37% 0.08 168); --cat-kompetencer-bg: oklch(94% 0.03 168);
   --cat-adfaerd-ink:     oklch(37% 0.05 52);  --cat-adfaerd-bg:     oklch(94% 0.02 52);
   --cat-resultater-ink:  oklch(37% 0.08 128); --cat-resultater-bg:  oklch(94% 0.03 128);
   --cat-reference-ink:   oklch(38% 0.05 80);  --cat-reference-bg:   oklch(94% 0.02 80);
 }
-html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--ink); -webkit-text-size-adjust: 100%; }
+html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--ink); -webkit-text-size-adjust: 100%; font-feature-settings: 'ss01', 'ss02'; -webkit-font-smoothing: antialiased; }
 body { display: flex; flex-direction: column; overflow: hidden; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -226,19 +266,59 @@ header {
 .section-sub-hdr-info .sub-count { font-size: 13px; font-weight: 500; }
 .section-sub-hdr-info .sub-hint  { font-size: 12px; color: var(--ink30); margin-top: 1px; }
 .section-list { flex: 1; overflow-y: auto; padding: 14px 20px; }
-.intro-card { margin-bottom: 14px; padding: 16px 20px; background: var(--card); border-radius: 10px; border: 1px solid var(--ink10); }
+.intro-card { margin-bottom: 14px; padding: 16px 20px; background: var(--card); border-radius: 6px; border: 1px solid var(--border-soft); }
 .intro-card-title { font-family: var(--display); font-size: 18px; font-weight: 500; margin-bottom: 5px; }
-.intro-card-body  { font-size: 12px; color: var(--ink60); line-height: 1.72; }
+.intro-card-body  { font-size: 12px; color: var(--ink-500); line-height: 1.72; }
 .intro-card-body p { margin: 0 0 8px; }
 .intro-card-body p:last-of-type { margin-bottom: 0; }
 .intro-card-sig {
-  font-size: 12px; color: var(--ink40); font-style: italic;
-  margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--ink05);
+  font-size: 12px; color: var(--ink-500); font-style: italic;
+  margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-soft);
 }
-.intro-card.is-manifest { padding: 18px 22px; }
-.intro-card.is-manifest .intro-card-body { font-size: 13px; line-height: 1.72; color: var(--ink70); }
+
+/* ── Letter-card hero (Mellem) ────────────────────────────────────────────
+   Manifest-card formes som et brev: dobbelt indrammet, rust-streg,
+   kapitelnummer, stor serif-titel, drop-cap, dashed sig-line, Caveat-signatur. */
+.intro-card.is-manifest {
+  position: relative;
+  max-width: 760px; margin: 0 auto 24px;
+  padding: 28px 36px 24px;
+  background: var(--paper-50);
+  border: 1px solid var(--border-soft);
+  border-radius: 2px;
+  box-shadow: var(--shadow-2);
+}
+.intro-card.is-manifest::before {
+  content: ''; position: absolute; inset: 6px;
+  border: 1px solid var(--border-soft);
+  pointer-events: none; border-radius: 1px;
+}
+.intro-card.is-manifest::after {
+  content: ''; position: absolute; top: 28px; left: 36px;
+  width: 40px; height: 2px; background: var(--rust);
+}
+.intro-card.is-manifest .intro-card-body {
+  font-family: var(--font-display); font-size: 16px; line-height: 1.65;
+  color: var(--ink-700); font-weight: 400;
+  margin-top: 14px; max-width: 600px;
+}
+.intro-card.is-manifest .intro-card-body p { margin: 0 0 12px; }
+.intro-card.is-manifest .intro-card-body p:last-of-type { margin-bottom: 0; }
+.intro-card.is-manifest .intro-card-body p:first-of-type::first-letter {
+  font-size: 42px; float: left; line-height: 0.9;
+  padding: 4px 8px 0 0; font-style: italic; color: var(--rust);
+}
+.intro-card.is-manifest .intro-card-sig {
+  font-family: var(--font-hand);
+  font-size: 24px; color: var(--rust);
+  font-style: normal; font-weight: 500;
+  margin-top: 18px; padding-top: 14px;
+  border-top: 1px dashed var(--border);
+  letter-spacing: 0.01em;
+}
+
 /* Hero placement på Spørgsmål-fanen — full width over q-stereo */
-.q-hero { margin: 14px 20px 0; }
+.q-hero { margin: 28px 28px 4px; }
 .acc-card { margin-bottom: 5px; border-radius: 10px; overflow: hidden; border: 1px solid var(--ink10); background: var(--card); transition: border-color 0.15s; }
 .acc-card.open { border-color: var(--ink15); }
 .acc-top { display: flex; gap: 12px; align-items: flex-start; padding: 13px 16px; cursor: pointer; }
