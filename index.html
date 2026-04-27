@@ -91,6 +91,39 @@ header {
 .admin-mode .acc-note-dot,
 .admin-mode .note-textarea,
 .admin-mode .note-save-row { display: none !important; }
+/* Phase 8.5: Update notification banner (blue, distinct from red admin banner) */
+#update-banner {
+  background: oklch(45% 0.13 240); color: var(--white);
+  padding: 8px 20px; font-size: 12px; font-weight: 500;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+#update-banner .banner-icon { font-size: 14px; }
+#update-banner .banner-text { flex: 1; }
+#update-banner .banner-btns { display: flex; gap: 6px; }
+#update-banner .banner-btn {
+  padding: 4px 12px; background: rgba(255,255,255,0.18); color: var(--white);
+  border: 1px solid rgba(255,255,255,0.4); border-radius: 5px;
+  font-size: 11px; font-weight: 500; cursor: pointer;
+}
+#update-banner .banner-btn:hover { background: rgba(255,255,255,0.28); }
+#update-banner .banner-btn.primary {
+  background: var(--white); color: oklch(35% 0.13 240);
+  border-color: var(--white);
+}
+#update-banner .banner-btn.primary:hover { background: oklch(95% 0.02 240); }
+/* Update preview modal: diff list styling */
+.update-diff-section {
+  font-size: 12px; color: var(--ink70); margin: 0 0 10px;
+}
+.update-diff-section strong { color: var(--ink); }
+.update-diff-list {
+  font-size: 11px; color: var(--ink40); margin: 4px 0 0; padding: 0;
+  list-style: none; max-height: 120px; overflow-y: auto;
+}
+.update-diff-list li {
+  padding: 3px 0; border-bottom: 1px solid var(--ink05);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 /* ── Body wrap ── */
 .body-wrap { flex: 1; display: flex; overflow: hidden; }
 .section { display: none; flex: 1; flex-direction: column; overflow: hidden; }
@@ -336,7 +369,18 @@ textarea.finput { resize: vertical; line-height: 1.65; }
 <div id="admin-banner" style="display:none">
   <span class="banner-icon">⚠</span>
   <span class="banner-text" id="admin-banner-text">ADMIN — du redigerer master-biblioteket. Ændringer påvirker alle nye brugere.</span>
+  <button class="banner-exit" id="admin-publish-btn" onclick="openPublishConfirm()" style="margin-right:6px">Publicér v?</button>
   <button class="banner-exit" onclick="exitAdminMode()">Forlad admin</button>
+</div>
+
+<div id="update-banner" style="display:none">
+  <span class="banner-icon">↻</span>
+  <span class="banner-text" id="update-banner-text">Spørgsmålsbiblioteket er opdateret.</span>
+  <div class="banner-btns">
+    <button class="banner-btn" onclick="openUpdatePreview()">Se ændringer</button>
+    <button class="banner-btn primary" onclick="onClickUpdateNow()">Opdater nu</button>
+    <button class="banner-btn" onclick="dismissUpdate()">Senere</button>
+  </div>
 </div>
 
 <!-- Admin confirmation modal -->
@@ -352,6 +396,55 @@ textarea.finput { resize: vertical; line-height: 1.65; }
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeAdminConfirm()">Annullér</button>
         <button class="btn btn-primary" id="admin-confirm-ok" onclick="confirmAdminChoice()">Skift til admin</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 8.5: Publicér ny master-version modal -->
+<div class="overlay" id="publish-overlay" onclick="if(event.target===this)closePublishConfirm()">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hdr">
+      <span class="modal-title" id="publish-title">Publicér master v?</span>
+      <button class="modal-close" onclick="closePublishConfirm()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;line-height:1.6;color:var(--ink70);margin:0 0 12px">
+        Du er ved at publicere en ny version af master-biblioteket. Eksisterende
+        brugere får en notifikation om at de kan opdatere deres kopi. Bemærk:
+        deres egne markeringer (★) og bias-noter bevares.
+      </p>
+      <label style="font-size:11px;color:var(--ink40);display:block;margin-bottom:4px">
+        Kort beskrivelse af ændringer (valgfrit, vises ikke til brugere)
+      </label>
+      <textarea id="publish-notes" rows="3"
+        placeholder="Fx: Gennemskrivning af alle spørgsmål."
+        style="width:100%;padding:8px;font-size:13px;border:1px solid var(--ink20);border-radius:5px;font-family:inherit;resize:vertical"></textarea>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closePublishConfirm()">Annullér</button>
+        <button class="btn btn-primary" id="publish-ok" onclick="confirmPublish()">Publicér</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 8.5: Update preview modal -->
+<div class="overlay" id="update-overlay" onclick="if(event.target===this)closeUpdatePreview()">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-hdr">
+      <span class="modal-title" id="update-title">Master er opdateret</span>
+      <button class="modal-close" onclick="closeUpdatePreview()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;line-height:1.6;color:var(--ink70);margin:0 0 14px" id="update-summary">
+      </p>
+      <div id="update-diff-body"></div>
+      <p style="font-size:11px;line-height:1.5;color:var(--ink40);margin:14px 0 0">
+        Dine markerede spørgsmål (★) og bias-noter bevares.
+      </p>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeUpdatePreview()">Senere</button>
+        <button class="btn btn-primary" id="update-ok" onclick="confirmUpdateNow()">Opdater nu</button>
       </div>
     </div>
   </div>
@@ -538,7 +631,7 @@ textarea.finput { resize: vertical; line-height: 1.65; }
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
   import {
-    getFirestore, collection, getDocs, doc, getDoc,
+    getFirestore, collection, getDocs, doc, getDoc, setDoc,
     writeBatch, serverTimestamp
   } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
   import {
@@ -738,6 +831,78 @@ textarea.finput { resize: vertical; line-height: 1.65; }
     }
     await batch.commit();
   };
+
+  // ─── Phase 8.5: Master version + brugeropdateringer ──────────────────────
+  // Bump master version. Kun admins kan kalde (Firestore-rules håndhæver det).
+  // Returnerer det nye versionsnummer.
+  window.fbPublishMasterVersion = async (notes) => {
+    const ref = doc(db, 'master', 'lib');
+    const snap = await getDoc(ref);
+    const cur = snap.exists() ? (snap.data().version || 1) : 1;
+    const next = cur + 1;
+    await setDoc(ref, {
+      version: next,
+      publishedAt: serverTimestamp(),
+      releaseNotes: (notes || '').trim()
+    }, { merge: true });
+    return next;
+  };
+
+  // Marker en bruger som "har set version N" — uden at flette ændringer ind.
+  // Bruges når bruger trykker "Senere" (skjul banner indtil næste version).
+  window.fbMarkUserSeenVersion = async (uid, version) => {
+    if (!uid || !version) return;
+    await setDoc(doc(db, 'users', uid), {
+      lastSeenMasterVersion: version
+    }, { merge: true });
+  };
+
+  // Flet master-opdateringer ind i brugerens kopi. Bevarer brugerens
+  // 'starred' (på spørgsmål) og 'note' (på bias).
+  // diff: { questionsUpsert:[{id,data}], questionsDelete:[id],
+  //        guideUpsert, guideDelete, biasUpsert, biasDelete }
+  // newVersion: bump både masterVersionAtClone + lastSeenMasterVersion til denne.
+  window.fbApplyMasterUpdate = async (uid, diff, newVersion) => {
+    const batch = writeBatch(db);
+    const now = serverTimestamp();
+    const types = ['questions', 'guide', 'bias'];
+    for (const t of types) {
+      const ups = diff[t + 'Upsert'] || [];
+      const dels = diff[t + 'Delete'] || [];
+      for (const u of ups) {
+        const ref = doc(db, `users/${uid}/${t}/${u.id}`);
+        if (u.isNew) {
+          batch.set(ref, {
+            ...u.data,
+            sourceId: u.id,
+            sourceVersion: newVersion,
+            customized: false,
+            createdAt: now,
+            updatedAt: now
+          });
+        } else {
+          // Flet master-felter ind, men bevar bruger-felter (starred, note)
+          // ved at undlade dem i u.data (kalderen sørger for det).
+          batch.set(ref, {
+            ...u.data,
+            sourceVersion: newVersion,
+            customized: false,
+            updatedAt: now
+          }, { merge: true });
+        }
+      }
+      for (const id of dels) {
+        batch.delete(doc(db, `users/${uid}/${t}/${id}`));
+      }
+    }
+    // Bump versions-tracking på user-profile
+    batch.set(doc(db, 'users', uid), {
+      masterVersionAtClone: newVersion,
+      lastSeenMasterVersion: newVersion,
+      lastUpdatedAt: now
+    }, { merge: true });
+    await batch.commit();
+  };
 </script>
 
 <!-- ─── Main app script ──────────────────────────────────────────────────── -->
@@ -889,6 +1054,12 @@ async function loadForUser(user) {
   // Tjek admin-status og opdater header
   isAdmin = await window.fbCheckIsAdmin(user.uid);
   updateAdminUI();
+
+  // Phase 8.5: tjek om der er en nyere master-version
+  userMasterVersion = data.profile?.lastSeenMasterVersion
+    || data.profile?.masterVersionAtClone
+    || 0;
+  await checkForMasterUpdate(user);
 }
 
 // Hent master direkte til app-state (bruges når admin går i admin-mode)
@@ -941,6 +1112,10 @@ let _syncDirty = false;
 // Admin mode state
 let isAdmin = false;       // brugeren har et doc i admins/{uid}
 let adminMode = false;     // brugeren har aktivt skiftet til admin-tilstand
+
+// Phase 8.5: Update tracking
+let userMasterVersion = 0;       // hvilken master-version brugerens kopi er på (lastSeenMasterVersion eller masterVersionAtClone)
+let pendingMasterUpdate = null;  // {newVersion, releaseNotes, diff, masterData} når der er en opdatering tilgængelig
 
 // Mode-aware signaturer: i admin-mode skriver vi til master, hvor 'starred'
 // (bruger-only) og bias 'note' (bruger-only) ikke hører hjemme.
@@ -1734,6 +1909,13 @@ function updateAdminUI() {
       const v = (masterMeta && masterMeta.version) || '?';
       txt.textContent = 'ADMIN — du redigerer master v' + v + '. Ændringer påvirker alle nye brugere.';
     }
+    // Phase 8.5: Publicér-knap viser næste versionsnummer
+    const pubBtn = document.getElementById('admin-publish-btn');
+    if (pubBtn) {
+      const cur = (masterMeta && masterMeta.version) || 1;
+      pubBtn.textContent = 'Publicér v' + (cur + 1);
+      pubBtn.title = 'Publicér en ny version af master-biblioteket';
+    }
   }
 }
 
@@ -1783,6 +1965,7 @@ async function enterAdminMode() {
     cloudSnapshot = null;        // master-snapshot bygges efter loadForAdmin
     _syncDirty = false;
     adminMode = true;            // VIGTIGT: sættes FØR loadForAdmin så sigs er korrekte
+    hideUpdateBanner();          // Phase 8.5: admin ser master direkte — ingen update-banner
     await loadForAdmin();
     cloudSnapshot = buildSnapshotFromArrays();
     updateAdminUI();
@@ -1821,6 +2004,350 @@ async function exitAdminMode() {
     render();
   } catch (err) {
     console.error('Exit admin error:', err);
+  } finally {
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
+// ─── Phase 8.5: Master-versionering + brugeropdateringer ─────────────────────
+
+// Tjek om der er en nyere master-version end brugerens lastSeenMasterVersion.
+// Bygger pendingMasterUpdate hvis ja, og viser update-banneret.
+async function checkForMasterUpdate(user) {
+  hideUpdateBanner();
+  pendingMasterUpdate = null;
+  if (!user || adminMode) return;
+  try {
+    const masterData = await window.fbLoadMaster();
+    const newVersion = (masterData.meta && masterData.meta.version) || 1;
+    if (newVersion <= userMasterVersion) return;       // ingen opdatering
+
+    const diff = computeMasterDiff(masterData);
+    pendingMasterUpdate = {
+      newVersion,
+      releaseNotes: (masterData.meta && masterData.meta.releaseNotes) || '',
+      diff,
+      masterData
+    };
+    showUpdateBanner();
+  } catch (err) {
+    console.error('checkForMasterUpdate error:', err);
+  }
+}
+
+// Beregn diff mellem master og brugerens nuværende kopi (Qs/Guide/Bias).
+// Returnerer { questionsUpsert, questionsDelete, guideUpsert, guideDelete,
+//              biasUpsert, biasDelete } hvor upsert-data IKKE indeholder
+// bruger-felter (starred, note) — dem bevarer vi ved at undlade dem.
+function computeMasterDiff(masterData) {
+  const result = {
+    questionsUpsert: [], questionsDelete: [],
+    guideUpsert: [], guideDelete: [],
+    biasUpsert: [], biasDelete: []
+  };
+
+  // ── Questions ──
+  const userQIds = new Set(Qs.map(q => q.id));
+  const masterQIds = new Set();
+  for (const mq of masterData.questions) {
+    masterQIds.add(mq.id);
+    const isNew = !userQIds.has(mq.id);
+    const masterFields = {
+      category: mq.category || '',
+      order: typeof mq.order === 'number' ? mq.order : 0,
+      text: mq.text || '',
+      notes: mq.notes || ''
+    };
+    if (isNew) {
+      // Nyt spørgsmål — tilføj med starred:false
+      result.questionsUpsert.push({
+        id: mq.id,
+        isNew: true,
+        data: { ...masterFields, starred: false }
+      });
+    } else {
+      // Eksisterende — opdater kun master-felter (starred bevares via merge)
+      const userQ = Qs.find(q => q.id === mq.id);
+      const changed =
+        (userQ.text || '') !== masterFields.text ||
+        (userQ.notes || '') !== masterFields.notes ||
+        (userQ.cat || '') !== masterFields.category ||
+        ((typeof userQ.order === 'number' ? userQ.order : 0) !== masterFields.order);
+      if (changed) {
+        result.questionsUpsert.push({
+          id: mq.id,
+          isNew: false,
+          data: masterFields
+        });
+      }
+    }
+  }
+  for (const uq of Qs) {
+    if (!masterQIds.has(uq.id)) result.questionsDelete.push(uq.id);
+  }
+
+  // ── Guide ──
+  const userGIds = new Set(Guide.map(g => g.id));
+  const masterGIds = new Set();
+  for (const mg of masterData.guide) {
+    masterGIds.add(mg.id);
+    const isNew = !userGIds.has(mg.id);
+    const masterFields = {
+      order: typeof mg.order === 'number' ? mg.order : 0,
+      headline: mg.headline || '',
+      short: mg.short || '',
+      detail: mg.detail || ''
+    };
+    if (isNew) {
+      result.guideUpsert.push({ id: mg.id, isNew: true, data: masterFields });
+    } else {
+      const userG = Guide.find(g => g.id === mg.id);
+      const changed =
+        (userG.headline || '') !== masterFields.headline ||
+        (userG.short || '') !== masterFields.short ||
+        (userG.detail || '') !== masterFields.detail ||
+        ((typeof userG.order === 'number' ? userG.order : 0) !== masterFields.order);
+      if (changed) {
+        result.guideUpsert.push({ id: mg.id, isNew: false, data: masterFields });
+      }
+    }
+  }
+  for (const ug of Guide) {
+    if (!masterGIds.has(ug.id)) result.guideDelete.push(ug.id);
+  }
+
+  // ── Bias ──
+  const userBIds = new Set(Bias.map(b => b.id));
+  const masterBIds = new Set();
+  for (const mb of masterData.bias) {
+    masterBIds.add(mb.id);
+    const isNew = !userBIds.has(mb.id);
+    const masterFields = {
+      order: typeof mb.order === 'number' ? mb.order : 0,
+      headline: mb.headline || '',
+      short: mb.short || '',
+      detail: mb.detail || ''
+    };
+    if (isNew) {
+      // Nyt bias-item — tilføj med tom note
+      result.biasUpsert.push({
+        id: mb.id,
+        isNew: true,
+        data: { ...masterFields, note: '' }
+      });
+    } else {
+      const userB = Bias.find(b => b.id === mb.id);
+      const changed =
+        (userB.headline || '') !== masterFields.headline ||
+        (userB.short || '') !== masterFields.short ||
+        (userB.detail || '') !== masterFields.detail ||
+        ((typeof userB.order === 'number' ? userB.order : 0) !== masterFields.order);
+      if (changed) {
+        result.biasUpsert.push({ id: mb.id, isNew: false, data: masterFields });
+      }
+    }
+  }
+  for (const ub of Bias) {
+    if (!masterBIds.has(ub.id)) result.biasDelete.push(ub.id);
+  }
+
+  return result;
+}
+
+function diffSummary(diff) {
+  let added = 0, updated = 0, removed = 0;
+  for (const t of ['questions', 'guide', 'bias']) {
+    for (const u of diff[t + 'Upsert']) {
+      if (u.isNew) added++; else updated++;
+    }
+    removed += diff[t + 'Delete'].length;
+  }
+  return { added, updated, removed };
+}
+
+function showUpdateBanner() {
+  if (!pendingMasterUpdate) return;
+  const banner = document.getElementById('update-banner');
+  if (!banner) return;
+  const { newVersion, diff, releaseNotes } = pendingMasterUpdate;
+  const s = diffSummary(diff);
+  const txt = document.getElementById('update-banner-text');
+  if (txt) {
+    let msg = 'Master v' + newVersion + ' er klar';
+    if (s.added || s.updated || s.removed) {
+      const parts = [];
+      if (s.added) parts.push(s.added + ' nye');
+      if (s.updated) parts.push(s.updated + ' ændrede');
+      if (s.removed) parts.push(s.removed + ' fjernede');
+      msg += ' — ' + parts.join(', ');
+    }
+    if (releaseNotes) msg += '. ' + releaseNotes;
+    txt.textContent = msg;
+  }
+  banner.style.display = 'flex';
+}
+
+function hideUpdateBanner() {
+  const banner = document.getElementById('update-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+function openUpdatePreview() {
+  if (!pendingMasterUpdate) return;
+  const { newVersion, diff } = pendingMasterUpdate;
+  const s = diffSummary(diff);
+  document.getElementById('update-title').textContent = 'Opdater til master v' + newVersion + '?';
+  let summary = 'Når du opdaterer:';
+  document.getElementById('update-summary').textContent = summary;
+
+  const body = document.getElementById('update-diff-body');
+  body.innerHTML = '';
+  const sections = [
+    { type: 'questions', label: 'Spørgsmål', arr: Qs, getLabel: q => q.text },
+    { type: 'guide', label: 'Interviewguide', arr: Guide, getLabel: g => g.headline },
+    { type: 'bias', label: 'Bias', arr: Bias, getLabel: b => b.headline }
+  ];
+  for (const sec of sections) {
+    const ups = diff[sec.type + 'Upsert'];
+    const dels = diff[sec.type + 'Delete'];
+    const newOnes = ups.filter(u => u.isNew);
+    const updOnes = ups.filter(u => !u.isNew);
+    if (!newOnes.length && !updOnes.length && !dels.length) continue;
+
+    const div = document.createElement('div');
+    div.className = 'update-diff-section';
+    const parts = [];
+    if (newOnes.length) parts.push('<strong>' + newOnes.length + '</strong> ny' + (newOnes.length === 1 ? '' : 'e'));
+    if (updOnes.length) parts.push('<strong>' + updOnes.length + '</strong> ændre' + (updOnes.length === 1 ? 't' : 'de'));
+    if (dels.length) parts.push('<strong>' + dels.length + '</strong> fjerne' + (dels.length === 1 ? 't' : 'de'));
+    div.innerHTML = sec.label + ': ' + parts.join(', ');
+
+    // Liste af items med korte labels
+    if (updOnes.length) {
+      const ul = document.createElement('ul');
+      ul.className = 'update-diff-list';
+      for (const u of updOnes) {
+        const userItem = sec.arr.find(x => x.id === u.id);
+        const lab = userItem ? sec.getLabel(userItem) : u.id;
+        const li = document.createElement('li');
+        li.textContent = '↻ ' + (lab || '(uden titel)').slice(0, 80);
+        ul.appendChild(li);
+      }
+      div.appendChild(ul);
+    }
+    if (newOnes.length) {
+      const ul = document.createElement('ul');
+      ul.className = 'update-diff-list';
+      for (const u of newOnes) {
+        const lab = u.data.text || u.data.headline || u.id;
+        const li = document.createElement('li');
+        li.textContent = '+ ' + (lab || '(uden titel)').slice(0, 80);
+        ul.appendChild(li);
+      }
+      div.appendChild(ul);
+    }
+    if (dels.length) {
+      const ul = document.createElement('ul');
+      ul.className = 'update-diff-list';
+      for (const id of dels) {
+        const userItem = sec.arr.find(x => x.id === id);
+        const lab = userItem ? sec.getLabel(userItem) : id;
+        const li = document.createElement('li');
+        li.textContent = '− ' + (lab || '(uden titel)').slice(0, 80);
+        ul.appendChild(li);
+      }
+      div.appendChild(ul);
+    }
+    body.appendChild(div);
+  }
+  if (!body.children.length) {
+    body.innerHTML = '<p style="font-size:12px;color:var(--ink40)">Ingen synlige ændringer (kun version-bump).</p>';
+  }
+  document.getElementById('update-overlay').classList.add('on');
+}
+
+function closeUpdatePreview() {
+  document.getElementById('update-overlay').classList.remove('on');
+}
+
+function onClickUpdateNow() {
+  // Genvej fra banner → spring preview over og kør direkte
+  confirmUpdateNow();
+}
+
+async function confirmUpdateNow() {
+  if (!pendingMasterUpdate || !currentUser) return;
+  closeUpdatePreview();
+  document.getElementById('loading').classList.remove('hidden');
+  try {
+    // Flush evt. ventende user-sync så ingenting går tabt
+    clearTimeout(_syncTimer);
+    if (_syncDirty && cloudSnapshot) {
+      try { await flushCloudSync(); } catch(e) {}
+    }
+    const { newVersion, diff } = pendingMasterUpdate;
+    await window.fbApplyMasterUpdate(currentUser.uid, diff, newVersion);
+    pendingMasterUpdate = null;
+    userMasterVersion = newVersion;
+    hideUpdateBanner();
+    // Genindlæs brugerens kopi (nu med master-opdateringer flettet ind)
+    await loadForUser(currentUser);
+    render();
+    setStatus('opdateret til master v' + newVersion + ' ✓');
+  } catch (err) {
+    console.error('Apply master update error:', err);
+    alert('Kunne ikke opdatere: ' + (err.message || err));
+  } finally {
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
+async function dismissUpdate() {
+  if (!pendingMasterUpdate || !currentUser) return;
+  const v = pendingMasterUpdate.newVersion;
+  hideUpdateBanner();
+  pendingMasterUpdate = null;
+  userMasterVersion = v;          // skjul banneret indtil næste version
+  try {
+    await window.fbMarkUserSeenVersion(currentUser.uid, v);
+  } catch (err) {
+    console.error('Mark seen version error:', err);
+  }
+}
+
+// ─── Admin: publicér ny master-version ────────────────────────────────────
+function openPublishConfirm() {
+  if (!adminMode) return;
+  const cur = (masterMeta && masterMeta.version) || 1;
+  const next = cur + 1;
+  document.getElementById('publish-title').textContent = 'Publicér master v' + next;
+  document.getElementById('publish-notes').value = '';
+  document.getElementById('publish-overlay').classList.add('on');
+}
+
+function closePublishConfirm() {
+  document.getElementById('publish-overlay').classList.remove('on');
+}
+
+async function confirmPublish() {
+  if (!adminMode) return;
+  const notes = document.getElementById('publish-notes').value || '';
+  closePublishConfirm();
+  document.getElementById('loading').classList.remove('hidden');
+  try {
+    // Flush evt. ventende master-sync først
+    clearTimeout(_syncTimer);
+    if (_syncDirty && cloudSnapshot) {
+      try { await flushCloudSync(); } catch(e) {}
+    }
+    const newVersion = await window.fbPublishMasterVersion(notes);
+    masterMeta = { ...masterMeta, version: newVersion, releaseNotes: notes };
+    setStatus('master v' + newVersion + ' publiceret ✓');
+    // Forlad admin-mode automatisk efter publish (almindeligt mønster: publicér og gå hjem)
+    await exitAdminMode();
+  } catch (err) {
+    console.error('Publish error:', err);
+    alert('Kunne ikke publicere: ' + (err.message || err));
   } finally {
     document.getElementById('loading').classList.add('hidden');
   }
@@ -1865,6 +2392,10 @@ async function handleAuthChange(user) {
       adminMode = false;
       isAdmin = false;
       updateAdminUI();
+      // Phase 8.5: skjul update-banner og ryd pending update
+      pendingMasterUpdate = null;
+      userMasterVersion = 0;
+      hideUpdateBanner();
       await loadAnonymous();
     }
     render();
