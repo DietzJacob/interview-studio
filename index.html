@@ -106,7 +106,7 @@ header {
 .hdr-btn:hover { background: var(--ink15); color: var(--ink); }
 .hdr-btn-primary { background: var(--ink); color: var(--white); }
 .hdr-btn-primary:hover { background: #333; }
-.hdr-status { font-size: 11px; color: var(--ink30); margin-right: 8px; font-family: var(--mono); }
+.hdr-status { font-size: 11px; color: var(--ink30); margin-right: 8px; font-family: var(--mono); white-space: nowrap; }
 /* Admin styling */
 .hdr-btn-admin { background: oklch(48% 0.14 28); color: var(--white); }
 .hdr-btn-admin:hover { background: oklch(42% 0.14 28); color: var(--white); }
@@ -235,13 +235,60 @@ header {
   line-height: 1.5;
   color: var(--ink-900);
 }
+.setup-quote-more {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--rust);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.setup-quote-more:hover { opacity: 0.7; }
 .setup-quote-sig {
-  margin-top: 12px;
+  margin-top: 8px;
   font-family: var(--font-hand);
   font-size: 18px;
   color: var(--rust);
   font-weight: 500;
 }
+/* Om-modal: prose-styling med serif body */
+.modal.modal-prose .modal-body { padding: 22px 28px 24px; }
+.modal-prose p {
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-700);
+  margin: 0 0 12px;
+}
+.modal-prose p:last-of-type { margin-bottom: 0; }
+.modal-prose p strong { font-weight: 600; color: var(--ink-900); }
+.modal-prose-sig {
+  font-family: var(--font-hand) !important;
+  font-style: normal !important;
+  font-size: 22px !important;
+  color: var(--rust) !important;
+  font-weight: 500 !important;
+  margin-top: 18px !important;
+}
+.modal-prose-divider {
+  border: none;
+  border-top: 1px dashed var(--border);
+  margin: 18px 0 14px;
+}
+.modal-prose-help {
+  font-size: 13px !important;
+  color: var(--ink-500) !important;
+  font-family: var(--font-ui) !important;
+}
+.modal-prose-help a {
+  color: var(--rust);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+.modal-prose-help a:hover { border-bottom-color: var(--rust); }
 /* ── Question card ── */
 .q-card {
   margin-bottom: 5px; border-radius: 9px; overflow: hidden;
@@ -254,13 +301,39 @@ header {
 .q-inner { display: flex; gap: 10px; align-items: flex-start; padding: 11px 12px; }
 .q-handle { color: var(--ink15); font-size: 15px; padding: 3px 2px; flex-shrink: 0; cursor: grab; user-select: none; touch-action: none; line-height: 1; }
 .q-handle:active { cursor: grabbing; color: var(--ink40); }
-.q-star { background: none; border: none; cursor: pointer; padding: 0; line-height: 1; font-size: 15px; color: var(--ink15); flex-shrink: 0; transition: color 0.15s; }
-.q-star.on { color: var(--accent); }
+.q-star {
+  background: none; border: none; cursor: pointer;
+  padding: 0; line-height: 1; font-size: 17px;
+  color: var(--ink-300); flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+.q-star:hover { color: var(--ochre); transform: scale(1.12); }
+.q-star.on {
+  color: var(--rust);
+  text-shadow: 0 0 1px var(--rust);
+  transform: scale(1.05);
+}
+.q-star.on:hover { transform: scale(1.15); }
+@keyframes star-pulse {
+  0% { transform: scale(1.05); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1.05); }
+}
+.q-star.on.just-marked { animation: star-pulse 0.32s ease-out; }
 .q-body { flex: 1; min-width: 0; }
 .q-text { font-size: 13px; line-height: 1.6; color: var(--ink); }
 .q-meta { margin-top: 5px; display: flex; align-items: center; gap: 7px; }
-.q-expand-btn { background: none; border: none; cursor: pointer; font-size: 11px; color: var(--ink15); flex-shrink: 0; padding: 2px 3px; line-height: 1; transition: color 0.15s; }
-.q-expand-btn:hover, .q-expand-btn.open { color: var(--ink40); }
+.q-expand-btn {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; border: 1.5px solid var(--ink10);
+  background: transparent; cursor: pointer;
+  font-size: 14px; color: var(--ink-400); flex-shrink: 0;
+  line-height: 1; transition: all 0.13s;
+  font-family: var(--sans);
+}
+.q-expand-btn:hover { border-color: var(--ink-400); color: var(--ink-700); background: var(--paper-200); }
+.q-expand-btn.open { border-color: var(--rust); color: var(--rust); }
 .q-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .q-ic { width: 28px; height: 28px; border-radius: 6px; border: 1.5px solid var(--ink10); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; color: var(--ink15); transition: all 0.13s; font-family: var(--sans); }
 .q-ic:hover { border-color: var(--ink30); color: var(--ink60); }
@@ -269,10 +342,11 @@ header {
 .q-listen { border-top: 1px solid var(--ink10); padding: 11px 12px 13px 37px; background: var(--warm); }
 .q-listen-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink30); margin-bottom: 6px; }
 .q-listen-body { font-size: 12px; color: var(--ink60); line-height: 1.72; white-space: pre-line; }
-.cat-hd { display: flex; align-items: center; gap: 9px; margin: 16px 0 7px; padding: 0 2px; }
-.cat-hd:first-child { margin-top: 0; }
-.cat-hd-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
-.cat-hd-line { flex: 1; height: 1px; background: var(--ink10); }
+.cat-hd { display: flex; align-items: center; gap: 10px; margin: 22px 0 10px; padding: 0 2px; }
+.cat-hd:first-child { margin-top: 4px; }
+.cat-hd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cat-hd-label { font-family: var(--display); font-style: italic; font-size: 22px; font-weight: 500; letter-spacing: 0; text-transform: none; line-height: 1.1; }
+.cat-hd-line { display: none; }
 /* ── Right panel (questions) ── */
 .q-panel { width: 228px; border-left: 1px solid var(--ink10); display: flex; flex-direction: column; flex-shrink: 0; background: var(--card); }
 .panel-hdr { padding: 14px 16px 12px; border-bottom: 1px solid var(--ink10); flex-shrink: 0; }
@@ -522,6 +596,29 @@ textarea.finput { resize: vertical; line-height: 1.65; }
   </div>
 </div>
 
+<!-- Om Interview Studio modal -->
+<div class="overlay" id="om-overlay" onclick="if(event.target===this)closeAboutModal()">
+  <div class="modal modal-prose" style="max-width:640px">
+    <div class="modal-hdr">
+      <span class="modal-title">Om Interview Studio</span>
+      <button class="modal-close" onclick="closeAboutModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Det her er ikke en HR-manual.</p>
+      <p>Jeg er Jacob Dietz og har arbejdet med rekruttering gennem tusindvis af samtaler.</p>
+      <p>Indholdet her er destilleret fra det arbejde og fra en serie interviews jeg lavede med 20 erfarne ledere om deres egen praksis. Hvad gør de rent faktisk? Hvilke spørgsmål stiller de i dag, og hvilke har de holdt op med at stille? Hvor har de lavet fejlansættelser, og hvad lærte de af dem?</p>
+      <p>Der findes ikke én rigtig metode til at interviewe. Men der findes mønstre — greb der går igen hos dem der har ansat mange og justeret deres praksis fordi virkeligheden tvang dem til det.</p>
+      <p><strong>Spørgsmålene</strong> er en startpakke. 36 åbne spørgsmål kategoriseret efter formål. Markér det der passer, tag arket med som en pejling, ikke et manuskript.</p>
+      <p><strong>Metoden</strong> er 13 principper om samtalen som håndværk: hold munden lukket længere end du tror, stil færre men gå dybere, lyt til samtalen — ikke kun til svaret.</p>
+      <p><strong>Bias</strong> er 18 mønstre du har, men ikke kan se. Pointen er ikke at eliminere dem. Pointen er at gøre dem synlige nok til at de ikke styrer alene.</p>
+      <p>Brug det der giver mening, lad resten ligge.</p>
+      <p class="modal-prose-sig">— Jacob</p>
+      <hr class="modal-prose-divider">
+      <p class="modal-prose-help">Brug for hjælp — skriv på <a href="mailto:jacob@dietz.dk">jacob@dietz.dk</a> / <a href="tel:+4522700716">22 70 07 16</a></p>
+    </div>
+  </div>
+</div>
+
 <!-- Phase 8.5: Publicér ny master-version modal -->
 <div class="overlay" id="publish-overlay" onclick="if(event.target===this)closePublishConfirm()">
   <div class="modal" style="max-width:480px">
@@ -603,7 +700,8 @@ textarea.finput { resize: vertical; line-height: 1.65; }
         <div class="setup-hint">★ Markér spørgsmål til højre og tryk <em>Download PDF</em> for at generere dit interviewark med plads til noter og vurdering pr. spørgsmål.</div>
         <div class="setup-quote">
           <div class="setup-quote-mark">"</div>
-          <p>Stil færre spørgsmål end du tror, og gå dybere end du plejer. Tag arket med som en pejling, ikke et manuskript. Lyt mere end du taler.</p>
+          <p>Bygget på tusindvis af samtaler — mine egne, og en serie interviews jeg har lavet med 20 erfarne ledere om hvad der virker.</p>
+          <a class="setup-quote-more" href="#" onclick="openAboutModal();return false;">Læs mere →</a>
           <div class="setup-quote-sig">— Jacob</div>
         </div>
       </div>
@@ -1458,7 +1556,7 @@ function renderQs() {
       if (!group.length) return;
       const hd = document.createElement('div');
       hd.className = 'cat-hd';
-      hd.innerHTML = `<span class="cat-hd-label" style="color:var(--cat-${cat.id}-ink)">${cat.label}</span><div class="cat-hd-line"></div>`;
+      hd.innerHTML = `<span class="cat-hd-dot" style="background:var(--cat-${cat.id}-ink)"></span><span class="cat-hd-label" style="color:var(--cat-${cat.id}-ink)">${cat.label}</span>`;
       list.appendChild(hd);
       group.forEach(q => list.appendChild(buildQCard(q, false)));
     });
@@ -1484,7 +1582,7 @@ function buildQCard(q, showCatTag) {
       <div class="q-actions">
         <button class="q-ic" data-act="edit" data-id="${q.id}" title="Rediger">✎</button>
         <button class="q-ic del" data-act="del" data-id="${q.id}" title="Slet">✕</button>
-        ${q.notes ? `<button class="q-expand-btn${exp ? ' open' : ''}" data-act="expand" data-id="${q.id}">${exp ? '▲' : '▼'}</button>` : ''}
+        ${q.notes ? `<button class="q-expand-btn${exp ? ' open' : ''}" data-act="expand" data-id="${q.id}" title="${exp ? 'Luk' : 'Læs hvad jeg lytter efter'}">${exp ? '▴' : '▾'}</button>` : ''}
       </div>
     </div>
     ${exp && q.notes ? `
@@ -1611,7 +1709,21 @@ function cancelNote() { bNoteEditing = null; renderBias(); }
 // ─── Star / filter ───────────────────────────────────────────────────────────
 function toggleStar(id) {
   const q = Qs.find(q => q.id === id);
-  if (q) { q.star = !q.star; saveQs(); render(); }
+  if (!q) return;
+  const wasOff = !q.star;
+  q.star = !q.star;
+  saveQs();
+  render();
+  // Pulse-animation kun når vi tænder for stjernen (ikke ved fjern)
+  if (wasOff) {
+    const btn = document.querySelector(`.q-card #card-${id} .q-star, [data-id="${id}"] .q-star`);
+    const card = document.getElementById('card-' + id);
+    const star = card ? card.querySelector('.q-star') : null;
+    if (star) {
+      star.classList.add('just-marked');
+      setTimeout(() => star.classList.remove('just-marked'), 350);
+    }
+  }
 }
 function clearStars() {
   Qs.forEach(q => q.star = false);
@@ -2450,6 +2562,13 @@ async function dismissUpdate() {
 }
 
 // ─── Admin: publicér ny master-version ────────────────────────────────────
+function openAboutModal() {
+  document.getElementById('om-overlay').classList.add('on');
+}
+function closeAboutModal() {
+  document.getElementById('om-overlay').classList.remove('on');
+}
+
 function openPublishConfirm() {
   if (!adminMode) return;
   const cur = (masterMeta && masterMeta.version) || 1;
