@@ -211,6 +211,37 @@ header {
 .nl-btn { flex: 1; height: 30px; border-radius: 6px; border: 1.5px solid var(--ink10); background: var(--white); color: var(--ink60); font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--sans); transition: all 0.15s; }
 .nl-btn.active { border-color: var(--ink); background: var(--ink); color: var(--white); }
 .setup-hint { font-size: 11px; color: var(--ink30); line-height: 1.65; }
+/* Sidebar quote-card (lille manifest-erstatning på Spørgsmål) */
+.setup-quote {
+  position: relative;
+  margin-top: 18px;
+  padding: 22px 16px 14px;
+  background: var(--paper-200);
+  border-radius: 6px;
+}
+.setup-quote-mark {
+  position: absolute;
+  top: -2px; left: 10px;
+  font-family: var(--font-display);
+  font-size: 56px; line-height: 1;
+  color: var(--rust);
+  font-style: italic;
+}
+.setup-quote p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-900);
+}
+.setup-quote-sig {
+  margin-top: 12px;
+  font-family: var(--font-hand);
+  font-size: 18px;
+  color: var(--rust);
+  font-weight: 500;
+}
 /* ── Question card ── */
 .q-card {
   margin-bottom: 5px; border-radius: 9px; overflow: hidden;
@@ -552,17 +583,6 @@ textarea.finput { resize: vertical; line-height: 1.65; }
 <div class="body-wrap">
   <!-- Questions -->
   <section class="section active" id="sec-q">
-    <div class="q-hero">
-      <div class="intro-card is-manifest">
-        <div class="intro-card-body">
-          <p>Spørgsmålene her er bygget af tusindvis af samtaler. Både mine egne og dem jeg har sparret med ledere om.</p>
-          <p>De er valgt fordi de får samtalerne ud over flosklerne og ind i det konkrete.</p>
-          <p>Det er en startpakke. En samtale er aldrig en liste af forudbestemte spørgsmål, den er en organisk proces, hvor det ene spørgsmål fører til det næste, drevet af hvad kandidaten faktisk siger.</p>
-          <p>Markér det der giver mening for rollen. Tag arket med som en pejling, ikke et manuskript. Stil færre spørgsmål end du tror, og gå dybere end du plejer. Og lyt mere end du taler.</p>
-        </div>
-        <div class="intro-card-sig">— Jacob</div>
-      </div>
-    </div>
     <div class="q-stereo">
       <!-- Left: candidate setup panel -->
       <div class="setup-panel">
@@ -581,6 +601,11 @@ textarea.finput { resize: vertical; line-height: 1.65; }
         </div>
         <div class="setup-divider"></div>
         <div class="setup-hint">★ Markér spørgsmål til højre og tryk <em>Download PDF</em> for at generere dit interviewark med plads til noter og vurdering pr. spørgsmål.</div>
+        <div class="setup-quote">
+          <div class="setup-quote-mark">"</div>
+          <p>Stil færre spørgsmål end du tror, og gå dybere end du plejer. Tag arket med som en pejling, ikke et manuskript. Lyt mere end du taler.</p>
+          <div class="setup-quote-sig">— Jacob</div>
+        </div>
       </div>
       <!-- Center: chips + list -->
       <div class="q-center">
