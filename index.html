@@ -323,17 +323,26 @@ header {
 .q-body { flex: 1; min-width: 0; }
 .q-text { font-size: 13px; line-height: 1.6; color: var(--ink); }
 .q-meta { margin-top: 5px; display: flex; align-items: center; gap: 7px; }
+.q-expand-hint {
+  font-family: var(--font-hand);
+  font-size: 15px; font-style: italic;
+  color: var(--ink-400);
+  margin-right: 2px; cursor: pointer;
+  user-select: none; transition: color 0.13s;
+}
+.q-expand-hint:hover { color: var(--ink-700); }
+.q-expand-hint.open { color: var(--rust); }
 .q-expand-btn {
   width: 28px; height: 28px;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 6px; border: 1.5px solid var(--ink10);
-  background: transparent; cursor: pointer;
-  font-size: 14px; color: var(--ink-400); flex-shrink: 0;
+  border-radius: 6px; border: 1.5px solid var(--ink-300);
+  background: var(--paper-200); cursor: pointer;
+  font-size: 16px; color: var(--ink-700); flex-shrink: 0;
   line-height: 1; transition: all 0.13s;
   font-family: var(--sans);
 }
-.q-expand-btn:hover { border-color: var(--ink-400); color: var(--ink-700); background: var(--paper-200); }
-.q-expand-btn.open { border-color: var(--rust); color: var(--rust); }
+.q-expand-btn:hover { border-color: var(--ink-700); color: var(--ink-900); background: var(--paper-300); }
+.q-expand-btn.open { border-color: var(--rust); color: var(--rust); background: var(--rust-soft); }
 .q-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .q-ic { width: 28px; height: 28px; border-radius: 6px; border: 1.5px solid var(--ink10); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; color: var(--ink15); transition: all 0.13s; font-family: var(--sans); }
 .q-ic:hover { border-color: var(--ink30); color: var(--ink60); }
@@ -1582,7 +1591,7 @@ function buildQCard(q, showCatTag) {
       <div class="q-actions">
         <button class="q-ic" data-act="edit" data-id="${q.id}" title="Rediger">✎</button>
         <button class="q-ic del" data-act="del" data-id="${q.id}" title="Slet">✕</button>
-        ${q.notes ? `<button class="q-expand-btn${exp ? ' open' : ''}" data-act="expand" data-id="${q.id}" title="${exp ? 'Luk' : 'Læs hvad jeg lytter efter'}">${exp ? '▴' : '▾'}</button>` : ''}
+        ${q.notes ? `<span class="q-expand-hint${exp ? ' open' : ''}" data-act="expand" data-id="${q.id}">${exp ? 'luk' : 'noter'}</span><button class="q-expand-btn${exp ? ' open' : ''}" data-act="expand" data-id="${q.id}" title="${exp ? 'Luk' : 'Læs hvad jeg lytter efter'}">${exp ? '▴' : '▾'}</button>` : ''}
       </div>
     </div>
     ${exp && q.notes ? `
