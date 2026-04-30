@@ -541,6 +541,119 @@ textarea.finput { resize: vertical; line-height: 1.65; }
   body.pv-mode .pv-ctrl { display: none !important; }
   body.pv-mode #pv { display: block !important; padding: 0; margin: 0; max-width: 100%; overflow: visible; }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   MOBIL (≤768px)
+   Læse-fokuseret: skjuler editing-chrome, full-width spørgsmålsliste,
+   touch-venlige knapper. Desktop-CSS er uændret.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* ── Header kompakt ── */
+  header { height: auto; min-height: 52px; flex-wrap: wrap; padding: 0; }
+  .hdr-brand { width: auto; padding: 0 14px; border-right: none; flex: 1; }
+  .hdr-brand-name { font-size: 15px; }
+  .hdr-brand-sub { display: none; }
+  .hdr-tabs { width: 100%; padding: 0 8px; border-top: 1px solid var(--ink10); justify-content: center; gap: 2px; }
+  .hdr-tab { padding: 8px 12px; font-size: 13px; }
+  .hdr-actions { padding: 0 10px; gap: 4px; }
+  .hdr-status { display: none; }
+  .hdr-btn { padding: 6px 10px; font-size: 11px; }
+  .hdr-btn-admin { display: none !important; }    /* Admin = desktop-only */
+  #hdr-pdf { display: none; }                      /* PDF download = desktop */
+  #hdr-add { display: none; }                      /* + Nyt spørgsmål = desktop */
+
+  /* ── Spørgsmål-fanen: skjul højre rail, stack stereo, full-width center ── */
+  .q-stereo { display: block; overflow: visible; }
+  .q-center { width: 100%; overflow: visible; }
+  .q-main { padding: 12px 14px; }
+  .q-panel { display: none; }                      /* "Til interviewet" skjules */
+
+  /* ── Setup-panel: behold quote, skjul felter ── */
+  .setup-panel {
+    width: 100%;
+    border-right: none;
+    padding: 14px 14px 4px;
+    overflow: visible;
+  }
+  .setup-panel-lbl,
+  .setup-field,
+  .setup-divider,
+  .nl-row,
+  .setup-hint { display: none; }
+  .setup-quote { margin-top: 0; }
+
+  /* ── Filter-chips: vandret scroll ── */
+  .chip-toolbar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding: 10px 14px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .chip-toolbar::-webkit-scrollbar { display: none; }
+  .chip { white-space: nowrap; flex-shrink: 0; }
+  .chip-divider { display: none; }
+
+  /* ── Spørgsmålskort: touch-venlige, læse-først ── */
+  .q-card { margin-bottom: 8px; }
+  .q-inner { padding: 12px 12px; gap: 10px; }
+  .q-handle { display: none; }                     /* Drag-handle = desktop */
+  .q-text { font-size: 15px; line-height: 1.55; }
+  .q-star { font-size: 22px; padding: 4px; }
+  .q-ic { width: 36px; height: 36px; font-size: 14px; }
+  .q-expand-btn { width: 36px; height: 36px; font-size: 18px; }
+  .q-expand-hint { font-size: 16px; }
+  .q-listen { padding: 12px 14px 14px 16px; }
+  .q-listen-body { font-size: 14px; line-height: 1.7; }
+
+  /* ── Kategori-overskrifter ── */
+  .cat-hd { margin: 18px 0 8px; }
+  .cat-hd-label { font-size: 19px; }
+
+  /* ── Letter-card hero (Metode/Bias) responsiv ── */
+  .intro-card.is-manifest {
+    max-width: 100%;
+    margin: 14px 14px 18px;
+    padding: 22px 18px 18px;
+  }
+  .intro-card.is-manifest::before { inset: 5px; }
+  .intro-card.is-manifest::after { left: 18px; top: 22px; }
+  .intro-card.is-manifest .intro-card-body {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+  .intro-card.is-manifest .intro-card-body p:first-of-type::first-letter {
+    font-size: 36px;
+  }
+
+  /* ── Section sub-header (Metode/Bias) ── */
+  .section-sub-hdr { padding: 12px 16px; }
+  .section-list { padding: 12px 14px; }
+
+  /* ── Accordion-kort (Metode/Bias) ── */
+  .acc-top { padding: 12px 14px; gap: 10px; }
+  .acc-detail { padding: 13px 14px 16px 14px; }
+  .acc-title { font-size: 14.5px; }
+  .acc-detail-body { font-size: 13.5px; line-height: 1.7; }
+
+  /* ── Modaler: fylder mere af viewport ── */
+  .overlay { padding: 12px; align-items: flex-start; padding-top: 24px; }
+  .modal { max-width: 100% !important; max-height: 92vh; }
+  .modal-hdr { padding: 14px 16px; }
+  .modal-body { padding: 14px 16px; }
+  .modal.modal-prose .modal-body { padding: 16px 18px 20px; }
+  .modal-prose p { font-size: 14.5px; line-height: 1.6; }
+
+  /* ── Banners: stack indhold ── */
+  #admin-banner, #update-banner {
+    padding: 8px 12px;
+    font-size: 11px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  #update-banner .banner-btns { flex-wrap: wrap; }
+}
 </style>
 </head>
 <body>
