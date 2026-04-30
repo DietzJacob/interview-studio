@@ -548,6 +548,16 @@ textarea.finput { resize: vertical; line-height: 1.65; }
    touch-venlige knapper. Desktop-CSS er uændret.
    ───────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* ── Page-scroll: lad hele siden rulle naturligt på mobil ── */
+  html, body { height: auto; overflow-y: auto; overflow-x: hidden; }
+  body { min-height: 100vh; }
+  .body-wrap { overflow: visible; height: auto; flex: none; }
+  .section { overflow: visible; height: auto; }
+  .q-main, .section-list { overflow: visible; flex: none; height: auto; }
+
+  /* Sticky header så tabs altid er inden for rækkevidde */
+  header { position: sticky; top: 0; z-index: 50; background: var(--card); }
+
   /* ── Header kompakt ── */
   header { height: auto; min-height: 52px; flex-wrap: wrap; padding: 0; }
   .hdr-brand { width: auto; padding: 0 14px; border-right: none; flex: 1; }
