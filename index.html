@@ -6,75 +6,69 @@
 <title>Interview Studio · & Dietz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400;1,8..60,500&family=Caveat:wght@500;600&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  /* ── Nye design-tokens (Mellem) ────────────────────────────────────────── */
-  --paper-50:  #FDFAF3;
-  --paper-100: #FBF7EE;
-  --paper-200: #F7F2E8;
-  --paper-300: #EFE8DA;
-  --paper-400: #E4DBC7;
-  --paper-500: #C9BFA8;
+  /* ── Studio tokens (kilde til sandhed) ─────────────────────────────────── */
+  --paper:     #faf7f2;
+  --ink:       #211f1d;
+  --muted:     #776f63;
+  --soft:      #5c564c;
+  --line:      #ece4d7;
+  --rust:      #b5613c;
+  --rust-soft: #f6ece4;
+  --card:      #ffffff;
 
-  --ink-900: #1A1611;
-  --ink-700: #3A332A;
-  --ink-500: #6B6356;
-  --ink-400: #8A8275;
-  --ink-300: #B8B0A0;
+  /* Ekstra Studio-grå nuancer */
+  --triad-2:   #3f3a33;
+  --wordmark-sep: #9b9488;
+  --star-off:  #d8cdbb;
+  --tile-arrow: #c9c0b2;
+  --seg-track: #efe9df;
+  --chip-count: #b3aa9c;
+  --listen-text: #4d473d;
 
-  --rust:        oklch(0.56 0.13 38);
-  --rust-soft:   oklch(0.92 0.04 50);
-  --forest:      oklch(0.42 0.06 150);
-  --forest-soft: oklch(0.93 0.03 145);
-  --ochre:       oklch(0.72 0.10 75);
-  --plum:        oklch(0.42 0.08 350);
+  --font-display: 'Spectral', Georgia, serif;
+  --font-ui:      'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  --surface:     #FFFFFF;
-  --surface-2:   var(--paper-200);
-  --border:      var(--paper-400);
-  --border-soft: var(--paper-300);
+  --shadow-card: 0 1px 2px rgba(40,30,20,0.03);
+  --shadow-pdf:  0 6px 16px -6px rgba(181,97,60,0.6);
 
-  --font-display: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
-  --font-ui:      'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
-  --font-hand:    'Caveat', 'Bradley Hand', cursive;
-
-  --shadow-1: 0 1px 0 rgba(26,22,17,0.04), 0 1px 2px rgba(26,22,17,0.04);
-  --shadow-2: 0 1px 0 rgba(26,22,17,0.05), 0 4px 12px rgba(26,22,17,0.06);
-  --shadow-3: 0 2px 0 rgba(26,22,17,0.05), 0 12px 30px rgba(26,22,17,0.08);
-
-  /* ── Bagudkompatible alias (så eksisterende CSS fortsat virker) ────────── */
-  --ink:   #1A1611;
-  --ink70: rgba(26,22,17,0.70);
-  --ink60: rgba(26,22,17,0.60);
-  --ink40: rgba(26,22,17,0.40);
-  --ink30: rgba(26,22,17,0.30);
-  --ink15: rgba(26,22,17,0.15);
-  --ink10: rgba(26,22,17,0.08);
-  --ink05: rgba(26,22,17,0.04);
+  /* ── Bagudkompatible alias (eksisterende CSS bruger disse) ─────────────── */
+  --ink70: rgba(33,31,29,0.70);
+  --ink60: var(--muted);
+  --ink40: rgba(33,31,29,0.40);
+  --ink30: var(--chip-count);
+  --ink15: rgba(33,31,29,0.15);
+  --ink10: var(--line);
+  --ink05: rgba(33,31,29,0.04);
   --white: #ffffff;
-  --bg:    var(--paper-100);
-  --card:  var(--surface);
-  --accent:  var(--rust);
-  --warm:    var(--paper-50);
+  --bg:    var(--paper);
+  --accent: var(--rust);
+  --warm:  var(--rust-soft);
   --display: var(--font-display);
   --sans:    var(--font-ui);
-  --mono:    var(--font-mono);
+  --mono:    var(--font-ui);
 
-  /* Kategori-farver bevares */
-  --cat-aabning-ink:     oklch(38% 0.07 230); --cat-aabning-bg:     oklch(94% 0.03 230);
-  --cat-kompetencer-ink: oklch(37% 0.08 168); --cat-kompetencer-bg: oklch(94% 0.03 168);
-  --cat-adfaerd-ink:     oklch(37% 0.05 52);  --cat-adfaerd-bg:     oklch(94% 0.02 52);
-  --cat-resultater-ink:  oklch(37% 0.08 128); --cat-resultater-bg:  oklch(94% 0.03 128);
-  --cat-reference-ink:   oklch(38% 0.05 80);  --cat-reference-bg:   oklch(94% 0.02 80);
+  /* Kategori-farver — alle peger på rust så vi har én accent */
+  --cat-aabning-ink:     var(--rust); --cat-aabning-bg:     var(--rust-soft);
+  --cat-kompetencer-ink: var(--rust); --cat-kompetencer-bg: var(--rust-soft);
+  --cat-adfaerd-ink:     var(--rust); --cat-adfaerd-bg:     var(--rust-soft);
+  --cat-resultater-ink:  var(--rust); --cat-resultater-bg:  var(--rust-soft);
+  --cat-reference-ink:   var(--rust); --cat-reference-bg:   var(--rust-soft);
 }
-html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--ink); -webkit-text-size-adjust: 100%; font-feature-settings: 'ss01', 'ss02'; -webkit-font-smoothing: antialiased; }
-body { display: flex; flex-direction: column; overflow: hidden; }
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--ink15); border-radius: 4px; }
+html, body {
+  font-family: var(--font-ui);
+  background: var(--paper); color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: 14px; line-height: 1.5;
+  margin: 0; padding: 0;
+}
+body { min-height: 100vh; }
+::-webkit-scrollbar { width: 0; }
 /* ── Header ── */
 header {
   height: 52px; background: var(--card); border-bottom: 1px solid var(--ink10);
@@ -621,6 +615,531 @@ textarea.finput { resize: vertical; line-height: 1.65; }
   body.pv-mode #pv { display: block !important; padding: 0; margin: 0; max-width: 100%; overflow: visible; }
 }
 
+/* ═════════════════════════════════════════════════════════════════════════
+   STUDIO LAYOUT (overrides legacy structure)
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* App container constraints — single centered column */
+.topbar, .hero, .hooks, .segwrap, .body-wrap {
+  max-width: 560px; margin-left: auto; margin-right: auto;
+}
+
+/* ── Topbar ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 22px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  height: auto; z-index: 50;
+}
+.mark { font-family: var(--font-display); font-size: 17px; color: var(--ink); white-space: nowrap; }
+.mark b { font-weight: 500; }
+.mark span { color: var(--wordmark-sep); }
+.topbar-actions { display: flex; align-items: center; gap: 6px; }
+.topbar-actions .hdr-status {
+  font-size: 11px; color: var(--muted);
+  font-family: var(--font-ui); white-space: nowrap;
+  margin-right: 4px;
+}
+.topbar-actions .hdr-btn {
+  font: inherit; font-size: 13px; font-weight: 500;
+  padding: 6px 12px; border-radius: 999px;
+  background: #fff; color: var(--muted);
+  border: 1px solid var(--line); cursor: pointer;
+  white-space: nowrap; transition: all 0.15s;
+}
+.topbar-actions .hdr-btn:hover { background: var(--rust-soft); color: var(--rust); border-color: var(--rust-soft); }
+.topbar-actions .hdr-btn-admin {
+  background: var(--rust); color: #fff; border-color: var(--rust);
+}
+.topbar-actions .hdr-btn-admin:hover { filter: brightness(0.95); background: var(--rust); color: #fff; }
+.topbar-actions .about {
+  font-size: 13px; color: var(--muted); font-weight: 500;
+  text-decoration: none; border: 1px solid var(--line);
+  padding: 6px 12px; border-radius: 999px; background: #fff;
+  cursor: pointer; white-space: nowrap;
+}
+.topbar-actions .about:hover { background: var(--rust-soft); color: var(--rust); border-color: var(--rust-soft); }
+
+/* ── Hero ── */
+.hero { padding: 28px 24px 20px; }
+.triad { margin: 0 0 16px; }
+.triad span {
+  display: block; font-family: var(--font-display); font-weight: 400;
+  font-size: 33px; line-height: 1.14; letter-spacing: -0.01em;
+}
+.triad span:nth-child(2) { color: var(--triad-2); }
+.triad span:last-child { color: var(--rust); }
+.hero p {
+  margin: 0; font-size: 16px; line-height: 1.5;
+  color: var(--soft); max-width: 33ch;
+}
+
+/* ── Hook tiles ── */
+.hooks {
+  padding: 14px 24px 6px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.hook {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 16px; padding: 15px 16px;
+  display: flex; gap: 14px; align-items: center;
+  cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .05s;
+  text-align: left; width: 100%; font: inherit; color: inherit;
+  box-shadow: var(--shadow-card);
+}
+.hook:active { transform: scale(0.992); }
+.hook .ic {
+  width: 34px; height: 34px; flex: 0 0 34px; border-radius: 10px;
+  background: var(--rust-soft); color: var(--rust);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 16px;
+}
+.hook .tx { display: flex; flex-direction: column; gap: 1px; }
+.hook .tx strong {
+  display: block; font-size: 16.5px; font-weight: 600;
+  line-height: 1.2; color: var(--ink);
+}
+.hook .tx span {
+  font-size: 13.5px; line-height: 1.4; color: var(--muted);
+}
+.hook .go { margin-left: auto; color: var(--tile-arrow); font-size: 18px; }
+.hook.active { border-color: var(--rust); box-shadow: 0 0 0 1px var(--rust); }
+.hook.active .go { color: var(--rust); }
+
+/* ── Segmented control (sticky) ── */
+.segwrap {
+  position: sticky; top: 0; z-index: 8;
+  background: linear-gradient(var(--paper) 72%, rgba(250,247,242,0));
+  padding: 14px 24px 10px;
+}
+.seg {
+  display: flex; gap: 5px;
+  background: var(--seg-track);
+  border-radius: 999px; padding: 4px;
+}
+.seg button {
+  flex: 1; font: inherit; font-size: 13.5px; font-weight: 600;
+  color: var(--muted); background: none; border: 0;
+  padding: 9px 0; border-radius: 999px; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.seg button.active { background: var(--ink); color: var(--paper); }
+
+/* ── Bottom slide-up bar ── */
+.bottombar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 9;
+  max-width: 560px; margin: 0 auto;
+  padding: 14px 24px calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(rgba(250,247,242,0), var(--paper) 38%);
+  display: flex; align-items: center; gap: 12px;
+  transform: translateY(120%);
+  transition: transform .28s cubic-bezier(.4,0,.2,1);
+}
+.bottombar.show { transform: translateY(0); }
+.bottombar .info { flex: 1; }
+.bottombar .info b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+.bottombar .info span { font-size: 12.5px; color: var(--muted); }
+.bottombar .pdf {
+  font: inherit; font-size: 14.5px; font-weight: 600; color: #fff;
+  background: var(--rust); border: 0; border-radius: 999px;
+  padding: 13px 20px; cursor: pointer;
+  box-shadow: var(--shadow-pdf);
+}
+.bottombar .pdf:active { transform: translateY(1px); }
+
+/* ── Skjul legacy layout (de bevares i DOM så JS virker) ── */
+.body-wrap { display: block; flex: none; overflow: visible; height: auto; }
+.section { overflow: visible; height: auto; flex: none; display: none; padding: 0 24px 24px; }
+.section.active { display: block; }
+.q-stereo { display: block; overflow: visible; height: auto; }
+.q-center { display: block; overflow: visible; height: auto; }
+.q-main { padding: 0; overflow: visible; max-width: none; }
+.setup-panel { display: none !important; }
+.q-panel { display: none !important; }
+.section-sub-hdr { display: none; }
+.chip-toolbar {
+  background: transparent; border: none; padding: 2px 0 14px;
+  margin: 0 -24px; overflow-x: auto; flex-wrap: nowrap;
+  scrollbar-width: none;
+}
+.chip-toolbar::-webkit-scrollbar { display: none; }
+.chip-toolbar > :first-child { margin-left: 24px; }
+.chip-toolbar > :last-child { margin-right: 24px; }
+
+/* Studio chips */
+.chip {
+  flex: 0 0 auto; font: inherit; font-size: 13px; font-weight: 600;
+  color: var(--soft); background: #fff;
+  border: 1px solid var(--line); padding: 7px 14px;
+  border-radius: 999px; cursor: pointer; white-space: nowrap;
+  transition: all .15s; display: inline-flex; align-items: center; gap: 5px;
+}
+.chip:hover { background: #fff; color: var(--ink); }
+.chip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip.active .chip-count { color: var(--wordmark-sep); }
+.chip-count { color: var(--chip-count); font-weight: 600; font-variant-numeric: tabular-nums; }
+.chip-divider { display: none; }
+#chip-starred.active { background: var(--rust); border-color: var(--rust); }
+
+.section-list { padding: 0; overflow: visible; flex: none; }
+.intro-card.is-manifest {
+  background: transparent; border: 1px dashed var(--line);
+  border-radius: 16px; padding: 17px; box-shadow: none;
+  max-width: none; margin: 0 0 14px;
+}
+.intro-card.is-manifest::before, .intro-card.is-manifest::after { display: none; }
+.intro-card.is-manifest .intro-card-body {
+  font-family: var(--font-ui); font-size: 14.5px; line-height: 1.55;
+  color: var(--soft); margin: 0;
+}
+.intro-card.is-manifest .intro-card-body p:first-of-type::first-letter {
+  font-size: inherit; float: none; padding: 0; font-style: normal; color: inherit;
+}
+.intro-card.is-manifest .intro-card-sig {
+  font-family: var(--font-display); font-style: italic;
+  color: var(--muted); font-size: 14.5px;
+  border-top: none; padding-top: 8px;
+  font-weight: 400;
+}
+
+/* Loading screen — Studio look */
+#loading {
+  position: fixed; inset: 0; background: var(--paper);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1000; gap: 8px;
+}
+#loading.hidden { display: none; }
+.loading-title { font-family: var(--font-display); font-size: 22px; color: var(--ink); }
+.loading-sub { font-size: 13px; color: var(--muted); }
+
+/* ── Banners (admin, update) — Studio look ── */
+#admin-banner, #update-banner {
+  max-width: 560px; margin: 0 auto;
+  border-radius: 0;
+  font-family: var(--font-ui);
+  font-size: 13px; font-weight: 500;
+}
+#admin-banner {
+  background: var(--ink); color: #fff;
+  padding: 10px 22px;
+}
+#admin-banner .banner-icon { font-size: 13px; }
+#admin-banner .banner-exit {
+  padding: 5px 12px; border-radius: 999px;
+  background: rgba(255,255,255,0.12); color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  font-size: 12px; font-weight: 600;
+}
+#admin-banner .banner-exit:hover { background: rgba(255,255,255,0.22); }
+#admin-banner.flash-ok { background: oklch(0.42 0.06 150); }
+
+#update-banner {
+  background: var(--rust-soft); color: var(--ink);
+  padding: 10px 22px;
+}
+#update-banner .banner-icon { color: var(--rust); }
+#update-banner .banner-btn {
+  padding: 5px 12px; border-radius: 999px;
+  background: #fff; color: var(--rust);
+  border: 1px solid var(--line);
+  font-size: 12px; font-weight: 600;
+}
+#update-banner .banner-btn:hover { background: var(--rust); color: #fff; }
+#update-banner .banner-btn.primary { background: var(--rust); color: #fff; border-color: var(--rust); }
+#update-banner .banner-btn.primary:hover { filter: brightness(0.95); }
+
+/* ── Modaler — Studio look ── */
+.overlay { background: rgba(33,31,29,0.42); padding: 16px; }
+.modal {
+  background: var(--card); border-radius: 16px;
+  box-shadow: 0 20px 60px -10px rgba(33,31,29,0.25);
+  border: 1px solid var(--line);
+}
+.modal-hdr {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-title {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 18px; color: var(--ink);
+}
+.modal-close {
+  background: none; border: 0; cursor: pointer;
+  color: var(--muted); font-size: 22px; line-height: 1;
+  padding: 0 4px;
+}
+.modal-close:hover { color: var(--ink); }
+.modal-body { padding: 20px 22px; }
+.modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+.flbl {
+  display: block; font-size: 12px; font-weight: 600;
+  color: var(--muted); margin: 0 0 5px;
+  font-family: var(--font-ui);
+}
+.flbl span { font-weight: 400; }
+.finput {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px;
+  font-family: var(--font-ui); font-size: 14px;
+  color: var(--ink); background: #fff;
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.finput:focus { border-color: var(--rust); }
+textarea.finput { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+.btn {
+  font: inherit; font-family: var(--font-ui);
+  font-size: 13.5px; font-weight: 600;
+  padding: 9px 18px; border-radius: 999px;
+  cursor: pointer; border: 1px solid var(--line);
+  background: #fff; color: var(--ink);
+  transition: all 0.15s;
+}
+.btn:hover { background: var(--rust-soft); border-color: var(--rust-soft); color: var(--rust); }
+.btn-secondary { color: var(--muted); }
+.btn-primary {
+  background: var(--rust); color: #fff; border-color: var(--rust);
+}
+.btn-primary:hover { filter: brightness(0.95); background: var(--rust); color: #fff; }
+
+/* Auth modal */
+.auth-msg { font-size: 13px; color: var(--soft); margin-bottom: 14px; line-height: 1.5; }
+.auth-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.auth-tab {
+  flex: 1; padding: 8px; border-radius: 999px;
+  background: var(--seg-track); border: 0;
+  font: inherit; font-size: 13px; font-weight: 600;
+  color: var(--muted); cursor: pointer;
+}
+.auth-tab.active { background: var(--ink); color: var(--paper); }
+
+/* Prose modal (Om Interview Studio) */
+.modal.modal-prose .modal-body { padding: 22px 26px 24px; }
+.modal-prose p {
+  font-family: var(--font-display);
+  font-size: 15px; line-height: 1.65; color: var(--soft);
+  margin: 0 0 12px;
+}
+.modal-prose p:last-of-type { margin-bottom: 0; }
+.modal-prose p strong { font-weight: 600; color: var(--ink); }
+.modal-prose-sig {
+  font-family: var(--font-display) !important;
+  font-style: italic !important;
+  font-size: 17px !important;
+  color: var(--muted) !important;
+  margin-top: 18px !important;
+}
+.modal-prose-divider { border: none; border-top: 1px dashed var(--line); margin: 18px 0 14px; }
+.modal-prose-help {
+  font-size: 13px !important;
+  color: var(--muted) !important;
+  font-family: var(--font-ui) !important;
+}
+.modal-prose-help a {
+  color: var(--rust); text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+.modal-prose-help a:hover { border-bottom-color: var(--rust); }
+
+/* Category grid (i edit-modal) */
+.cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 14px; }
+.cat-pill {
+  padding: 8px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: #fff;
+  font: inherit; font-size: 13px; cursor: pointer;
+  color: var(--ink); text-align: left;
+  transition: all 0.15s;
+}
+.cat-pill:hover { border-color: var(--muted); }
+.cat-pill.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* Skjul "+ Nyt"-knap som default — vises kun i admin-mode */
+body:not(.admin-mode) #hdr-add { display: none !important; }
+
+/* ── Mobil (≤480px): full width, ingen centerede max-widths ── */
+@media (max-width: 480px) {
+  .topbar, .hero, .hooks, .segwrap, .body-wrap, .bottombar { max-width: none; }
+  .topbar { padding: 12px 20px 10px; }
+  .topbar-actions .hdr-status { display: none; }
+  .topbar-actions .hdr-btn-auth { padding: 5px 10px; font-size: 12px; }
+  .mark { font-size: 15px; }
+  .hero { padding: 24px 24px 16px; }
+  .triad span { font-size: 30px; }
+  .hooks { padding: 12px 24px 4px; }
+  .segwrap { padding: 12px 24px 8px; }
+  .section { padding: 0 24px 100px; }
+}
+/* ── Tablet/desktop (>480px): centered med max-width ── */
+@media (min-width: 901px) {
+  .triad span { font-size: 38px; }
+  .hero { padding: 48px 24px 24px; }
+}
+
+/* ── Studio: cathead, qcard, listen ── */
+.cathead {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 15px; color: var(--wordmark-sep);
+  margin: 18px 0 12px; display: flex; align-items: baseline; gap: 10px;
+}
+.cathead::after {
+  content: ""; flex: 1; height: 1px; background: var(--line);
+}
+.cathead.first { margin-top: 4px; }
+
+.qcard {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 16px; padding: 17px 17px 15px;
+  margin-bottom: 12px; box-shadow: var(--shadow-card);
+}
+.qcard .meta {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 9px; gap: 8px;
+}
+.qcard .cat {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--rust);
+}
+.qcard .q-actions {
+  display: flex; align-items: center; gap: 6px;
+}
+.qcard .q-ic {
+  background: none; border: 1px solid var(--line);
+  border-radius: 8px; cursor: pointer;
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 12px;
+  font-family: var(--font-ui);
+  transition: all 0.13s;
+}
+.qcard .q-ic:hover { border-color: var(--muted); color: var(--ink); }
+.qcard .q-ic.del:hover { border-color: #c03030; color: #c03030; }
+
+.qcard .star {
+  background: none; border: 0; cursor: pointer;
+  font-size: 20px; line-height: 1; color: var(--star-off);
+  padding: 0; transition: transform .12s, color .12s;
+}
+.qcard .star:active { transform: scale(1.25); }
+.qcard .star.on { color: var(--rust); }
+
+.qcard h3 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 21px; line-height: 1.26;
+  margin: 0 0 10px; letter-spacing: -0.005em;
+  color: var(--ink);
+}
+
+.qcard .listen .toggle {
+  font: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+  font-size: 13.5px; font-weight: 600; color: var(--rust);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.qcard .listen .toggle .pl {
+  transition: transform .2s; display: inline-block;
+}
+.qcard .listen .toggle.open .pl { transform: rotate(45deg); }
+.qcard .listen .panel {
+  max-height: 0; overflow: hidden; transition: max-height .3s ease;
+}
+.qcard .listen .panel.open { max-height: 600px; }
+.qcard .listen .panel p {
+  margin: 11px 0 0; font-size: 14.5px; line-height: 1.5;
+  color: var(--listen-text);
+  background: var(--rust-soft);
+  border-radius: 12px; padding: 13px 15px;
+}
+
+/* ── Studio: Metode + Bias kort (pcard) ── */
+.pcard {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 16px; padding: 17px;
+  margin-bottom: 12px; box-shadow: var(--shadow-card);
+}
+.pcard .num {
+  font-family: var(--font-display); font-style: italic;
+  color: var(--rust); font-size: 14px;
+}
+.pcard h3 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 21px; line-height: 1.24;
+  margin: 6px 0 8px; letter-spacing: -0.005em;
+  color: var(--ink);
+}
+.pcard p {
+  margin: 0; font-size: 14.5px; line-height: 1.5;
+  color: var(--soft);
+}
+.pcard .pcard-actions {
+  display: flex; gap: 6px; margin-top: 10px;
+}
+.pcard .pcard-actions button {
+  background: none; border: 1px solid var(--line);
+  border-radius: 8px; cursor: pointer;
+  padding: 5px 10px; font-size: 12px; font-family: var(--font-ui);
+  color: var(--muted); transition: all 0.13s;
+}
+.pcard .pcard-actions button:hover { border-color: var(--muted); color: var(--ink); }
+.pcard .pcard-actions button.del:hover { border-color: #c03030; color: #c03030; }
+
+/* Bias-note */
+.biasnote { margin-top: 12px; }
+.biasnote button.biasnote-toggle {
+  font: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  display: inline-flex; gap: 7px; align-items: center;
+}
+.biasnote button.biasnote-toggle:hover { color: var(--rust); }
+.biasnote textarea {
+  width: 100%; margin-top: 9px;
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 11px 13px; font: inherit; font-size: 14px;
+  color: var(--ink); resize: vertical; min-height: 64px;
+  background: #fcfaf6; display: none;
+}
+.biasnote.open textarea { display: block; }
+
+/* ── Intro-card (dashed, Metode/Bias top) ── */
+.introcard {
+  background: none; border: 1px dashed var(--line);
+  border-radius: 16px; padding: 17px;
+  margin-bottom: 14px;
+}
+.introcard p {
+  margin: 0; font-size: 14.5px; line-height: 1.55;
+  color: var(--soft);
+}
+.introcard p + p { margin-top: 10px; }
+.introcard .sig {
+  font-family: var(--font-display); font-style: italic;
+  color: var(--muted);
+}
+
+/* PDF settings nl-btn */
+.pdf-nl-btn {
+  flex: 1; height: 38px; border-radius: 8px;
+  border: 1px solid var(--line); background: #fff;
+  color: var(--muted); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-ui);
+  transition: all 0.15s;
+}
+.pdf-nl-btn:hover { border-color: var(--muted); color: var(--ink); }
+.pdf-nl-btn.active {
+  background: var(--ink); border-color: var(--ink); color: var(--paper);
+}
+
+/* Feed footer */
+.feedfoot { padding: 24px 0 120px; }
+.feedfoot p {
+  margin: 0; font-family: var(--font-display); font-style: italic;
+  font-size: 16px; color: var(--muted); text-align: center;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
    MOBIL (≤768px)
    Læse-fokuseret: skjuler editing-chrome, full-width spørgsmålsliste,
@@ -781,22 +1300,25 @@ textarea.finput { resize: vertical; line-height: 1.65; }
   <div class="loading-sub">Henter spørgsmål fra master <span class="loading-dot"></span></div>
 </div>
 
-<header>
-  <div class="hdr-brand">
-    <span class="hdr-brand-name">Interview Studio</span>
-    <span class="hdr-brand-sub">& Dietz</span>
-  </div>
-  <nav class="hdr-tabs">
-    <button class="hdr-tab active" id="tab-q" onclick="switchTab('q')">Spørgsmål <span class="tab-count" id="tab-q-count">0</span></button>
-    <button class="hdr-tab" id="tab-g" onclick="switchTab('g')">Metode <span class="tab-count" id="tab-g-count">0</span></button>
-    <button class="hdr-tab" id="tab-b" onclick="switchTab('b')">Bias <span class="tab-count" id="tab-b-count">0</span></button>
-  </nav>
-  <div class="hdr-actions">
+<!-- Studio: Topbar -->
+<header class="topbar">
+  <div class="mark"><b>Interview Studio</b> <span>· &amp; Dietz</span></div>
+  <div class="topbar-actions">
     <span class="hdr-status" id="hdr-status" title="Datakilde"></span>
     <button class="hdr-btn hdr-btn-admin" id="hdr-admin" onclick="onClickAdmin()" style="display:none">Master</button>
-    <button class="hdr-btn" id="hdr-auth" onclick="openAuthModal()">Log ind</button>
-    <button class="hdr-btn" id="hdr-pdf" onclick="showPV()">⎙ Download PDF</button>
-    <button class="hdr-btn hdr-btn-primary" id="hdr-add" onclick="openAdd()">+ Nyt spørgsmål</button>
+    <button class="hdr-btn hdr-btn-add" id="hdr-add" onclick="openAdd()">+ Nyt</button>
+    <button class="hdr-btn hdr-btn-auth" id="hdr-auth" onclick="openAuthModal()">Log ind</button>
+    <button class="about" onclick="openAboutModal()">Om</button>
+    <!-- Hidden tab spans bevares så JS-count opdateringer fortsat virker -->
+    <span style="display:none">
+      <span id="tab-q-count">0</span>
+      <span id="tab-g-count">0</span>
+      <span id="tab-b-count">0</span>
+      <button id="tab-q"></button>
+      <button id="tab-g"></button>
+      <button id="tab-b"></button>
+      <button id="hdr-pdf" onclick="openPdfModal()"></button>
+    </span>
   </div>
 </header>
 
@@ -830,6 +1352,40 @@ textarea.finput { resize: vertical; line-height: 1.65; }
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeAdminConfirm()">Annullér</button>
         <button class="btn btn-primary" id="admin-confirm-ok" onclick="confirmAdminChoice()">Skift til admin</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PDF settings modal -->
+<div class="overlay" id="pdf-overlay" onclick="if(event.target===this)closePdfModal()">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-hdr">
+      <span class="modal-title">Klar til interview?</span>
+      <button class="modal-close" onclick="closePdfModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin:0 0 16px;line-height:1.5">
+        Udfyld kandidatens info — det kommer øverst på dit ark.
+      </p>
+      <label class="flbl">Kandidat-navn</label>
+      <input class="finput" id="pdf-name" placeholder="Anna Møller">
+      <label class="flbl">Stilling</label>
+      <input class="finput" id="pdf-role" placeholder="Head of Marketing">
+      <label class="flbl">Dato</label>
+      <input class="finput" id="pdf-date" placeholder="19. april 2026">
+      <label class="flbl">Interviewer</label>
+      <input class="finput" id="pdf-iewer" placeholder="Jacob Dietz">
+      <label class="flbl" style="margin-top:6px">Note-linjer pr. spørgsmål</label>
+      <div id="pdf-nl-row" style="display:flex;gap:5px;margin-bottom:14px">
+        <button class="pdf-nl-btn" data-n="2" onclick="setPdfNL(2)">2</button>
+        <button class="pdf-nl-btn active" data-n="3" onclick="setPdfNL(3)">3</button>
+        <button class="pdf-nl-btn" data-n="4" onclick="setPdfNL(4)">4</button>
+        <button class="pdf-nl-btn" data-n="5" onclick="setPdfNL(5)">5</button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closePdfModal()">Annullér</button>
+        <button class="btn btn-primary" onclick="confirmPdfGen()">⎙ Lav PDF</button>
       </div>
     </div>
   </div>
@@ -914,6 +1470,40 @@ textarea.finput { resize: vertical; line-height: 1.65; }
     <button class="btn btn-secondary" onclick="hidePV()">← Tilbage</button>
   </div>
   <div id="pv-content"></div>
+</div>
+
+<!-- Studio: Hero -->
+<div class="hero">
+  <div class="triad"><span>Gode spørgsmål.</span><span>Bedre samtaler.</span><span>De rigtige ansættelser.</span></div>
+  <p>Det hænger sammen — i den rækkefølge. Her er spørgsmålene, metoderne og de blinde vinkler.</p>
+</div>
+
+<!-- Studio: Hook tiles -->
+<div class="hooks">
+  <button class="hook" data-go="q" onclick="switchTab('q')">
+    <span class="ic">36</span>
+    <span class="tx"><strong>Spørgsmål til din næste samtale</strong><span>Åbne spørgsmål, kategoriseret efter formål</span></span>
+    <span class="go">→</span>
+  </button>
+  <button class="hook" data-go="g" onclick="switchTab('g')">
+    <span class="ic">13</span>
+    <span class="tx"><strong>Metoder og indsigter</strong><span>Principper om samtalen som håndværk</span></span>
+    <span class="go">→</span>
+  </button>
+  <button class="hook" data-go="b" onclick="switchTab('b')">
+    <span class="ic">18</span>
+    <span class="tx"><strong>Bias i jobsamtaler</strong><span>Så du ikke står i vejen for den rigtige</span></span>
+    <span class="go">→</span>
+  </button>
+</div>
+
+<!-- Studio: Segmented control (sticky) -->
+<div class="segwrap">
+  <div class="seg" id="seg">
+    <button data-go="q" onclick="switchTab('q')">Spørgsmål</button>
+    <button data-go="g" onclick="switchTab('g')">Metode</button>
+    <button data-go="b" onclick="switchTab('b')">Bias</button>
+  </div>
 </div>
 
 <div class="body-wrap">
@@ -1777,161 +2367,192 @@ function catTagHtml(catId) {
   const label = catLabel(catId);
   return `<span class="cat-tag" style="color:var(--cat-${catId}-ink);background:var(--cat-${catId}-bg)">${label}</span>`;
 }
+// ─── Studio: render Spørgsmål-feed ───────────────────────────────────────
 function renderQs() {
   const list = document.getElementById('q-list');
+  if (!list) return;
   const qs = sortedQs();
   if (!qs.length) {
     const msg = filter === 'starred'
-      ? '<h2>Ingen markerede spørgsmål</h2><p>Tryk ★ for at tilføje spørgsmål til din guide</p>'
-      : '<h2>Ingen spørgsmål her</h2><p>Brug "+ Nyt spørgsmål" for at tilføje</p>';
-    list.innerHTML = `<div class="empty-state">${msg}</div>`;
+      ? 'Ingen markerede spørgsmål endnu. Tryk på stjernen ved et spørgsmål for at samle dem her — og tag dem med som PDF til samtalen.'
+      : 'Ingen spørgsmål her. Brug "+ Nyt" for at tilføje.';
+    list.innerHTML = `<div class="introcard"><p>${msg}</p></div>`;
     return;
   }
-  list.innerHTML = '';
-  const showHeaders = filter === 'all' || filter === 'starred';
-  if (showHeaders) {
+  let html = '';
+  const grouped = (filter === 'all' || filter === 'starred');
+  if (grouped) {
+    let first = true;
     CATS.forEach(cat => {
       const group = qs.filter(q => q.cat === cat.id);
       if (!group.length) return;
-      const hd = document.createElement('div');
-      hd.className = 'cat-hd';
-      hd.innerHTML = `<span class="cat-hd-dot" style="background:var(--cat-${cat.id}-ink)"></span><span class="cat-hd-label" style="color:var(--cat-${cat.id}-ink)">${cat.label}</span>`;
-      list.appendChild(hd);
-      group.forEach(q => list.appendChild(buildQCard(q, false)));
+      html += `<div class="cathead${first ? ' first' : ''}">${cat.label}</div>`;
+      first = false;
+      group.forEach(q => { html += buildQCardHtml(q); });
     });
   } else {
-    qs.forEach(q => list.appendChild(buildQCard(q, true)));
+    qs.forEach(q => { html += buildQCardHtml(q); });
+  }
+  list.innerHTML = html;
+  // Wire up event delegation (én listener på listen)
+  list.onclick = handleQListClick;
+}
+
+function buildQCardHtml(q) {
+  const exp = qExpanded[q.id];
+  const catLab = catLabel(q.cat);
+  const adminBtns = (typeof adminMode !== 'undefined' && adminMode) ? `
+    <button class="q-ic" data-act="edit" data-id="${q.id}" title="Rediger">✎</button>
+    <button class="q-ic del" data-act="del" data-id="${q.id}" title="Slet">✕</button>` : '';
+  return `
+    <div class="qcard" id="card-${q.id}" data-id="${q.id}" data-cat="${q.cat}">
+      <div class="meta">
+        <span class="cat">${esc(catLab)}</span>
+        <div class="q-actions">${adminBtns}
+          <button class="star${q.star ? ' on' : ''}" data-act="star" data-id="${q.id}" aria-label="Markér">${q.star ? '★' : '☆'}</button>
+        </div>
+      </div>
+      <h3>${esc(q.text)}</h3>
+      ${q.notes ? `
+        <div class="listen">
+          <button class="toggle${exp ? ' open' : ''}" data-act="expand" data-id="${q.id}"><span class="pl">+</span> Hvad lytter jeg efter?</button>
+          <div class="panel${exp ? ' open' : ''}"><p>${esc(q.notes)}</p></div>
+        </div>` : ''}
+    </div>`;
+}
+
+function handleQListClick(e) {
+  const btn = e.target.closest('[data-act]');
+  if (!btn) return;
+  const { act, id } = btn.dataset;
+  if (act === 'star')   { toggleStar(id); }
+  else if (act === 'edit')   { openQEdit(id); }
+  else if (act === 'del')    { askDel('Q:' + id, Qs.find(q=>q.id===id)?.text?.slice(0,80) + '…'); }
+  else if (act === 'expand') {
+    qExpanded[id] = !qExpanded[id];
+    // Toggle panel uden full re-render (smooth animation)
+    const card = document.getElementById('card-' + id);
+    if (card) {
+      const toggle = card.querySelector('.toggle');
+      const panel = card.querySelector('.panel');
+      if (toggle && panel) {
+        toggle.classList.toggle('open', qExpanded[id]);
+        panel.classList.toggle('open', qExpanded[id]);
+      }
+    }
   }
 }
-function buildQCard(q, showCatTag) {
-  const exp = qExpanded[q.id];
+
+// Behold gammel buildQCard som no-op fallback hvis legacy kode kalder den
+function buildQCard(q) {
   const div = document.createElement('div');
-  div.className = 'q-card' + (q.star ? ' starred' : '');
-  div.id = 'card-' + q.id;
-  div.dataset.id = q.id;
-  div.dataset.cat = q.cat;
-  div.innerHTML = `
-    <div class="q-inner">
-      <span class="q-handle" title="Træk for at flytte">⠿</span>
-      <button class="q-star${q.star ? ' on' : ''}" data-act="star" data-id="${q.id}" title="${q.star ? 'Fjern markering' : 'Markér til interview'}">★</button>
-      <div class="q-body">
-        <div class="q-text">${esc(q.text)}</div>
-        ${showCatTag ? `<div class="q-meta">${catTagHtml(q.cat)}</div>` : ''}
-      </div>
-      <div class="q-actions">
-        <button class="q-ic" data-act="edit" data-id="${q.id}" title="Rediger">✎</button>
-        <button class="q-ic del" data-act="del" data-id="${q.id}" title="Slet">✕</button>
-        ${q.notes ? `<span class="q-expand-hint${exp ? ' open' : ''}" data-act="expand" data-id="${q.id}">${exp ? 'luk' : 'noter'}</span><button class="q-expand-btn${exp ? ' open' : ''}" data-act="expand" data-id="${q.id}" title="${exp ? 'Luk' : 'Læs hvad jeg lytter efter'}">${exp ? '▴' : '▾'}</button>` : ''}
-      </div>
-    </div>
-    ${exp && q.notes ? `
-      <div class="q-listen">
-        <div class="q-listen-lbl">Hvad lytter jeg efter?</div>
-        <div class="q-listen-body">${esc(q.notes)}</div>
-      </div>` : ''}`;
-  div.addEventListener('click', e => {
-    const btn = e.target.closest('[data-act]');
-    if (!btn) return;
-    const { act, id } = btn.dataset;
-    if (act === 'star')   { toggleStar(id); }
-    else if (act === 'edit')   { openQEdit(id); }
-    else if (act === 'del')    { askDel('Q:' + id, Qs.find(q=>q.id===id)?.text?.slice(0,80) + '…'); }
-    else if (act === 'expand') { qExpanded[id] = !qExpanded[id]; renderQs(); }
-  });
-  const handle = div.querySelector('.q-handle');
-  handle.addEventListener('mousedown', e => startDrag(e, q.id, false));
-  handle.addEventListener('touchstart', e => startDrag(e, q.id, true), {passive: false});
-  return div;
+  div.innerHTML = buildQCardHtml(q);
+  return div.firstElementChild;
 }
 
 // ─── Guide render ────────────────────────────────────────────────────────────
+// ─── Studio: render Metode-feed ──────────────────────────────────────────
 function renderGuide() {
   const list = document.getElementById('g-list');
-  const intro = list.querySelector('.intro-card');
-  list.innerHTML = '';
-  if (intro) list.appendChild(intro);
-  document.getElementById('g-count-lbl').textContent = Guide.length + ' principper';
+  if (!list) return;
   document.getElementById('tab-g-count').textContent = Guide.length;
+  const lbl = document.getElementById('g-count-lbl');
+  if (lbl) lbl.textContent = Guide.length + ' principper';
   const sorted = [...Guide].sort((a, b) => a.order - b.order);
+  const isAdmin = (typeof adminMode !== 'undefined' && adminMode);
+  let html = `
+    <div class="introcard">
+      <p>13 principper om samtalen som håndværk. Ikke regler — greb der går igen hos dem der har ansat mange og justeret deres praksis.</p>
+      <p class="sig">— Jacob</p>
+    </div>`;
   sorted.forEach((g, i) => {
-    const exp = gExpanded[g.id];
-    const card = document.createElement('div');
-    card.className = 'acc-card' + (exp ? ' open' : '');
-    card.innerHTML = `
-      <div class="acc-top" onclick="toggleG('${g.id}')">
-        <span class="acc-num">${String(i+1).padStart(2,'0')}</span>
-        <div class="acc-summary">
-          <div class="acc-title">${esc(g.headline)}</div>
-          <div class="acc-short">${esc(g.short)}</div>
-        </div>
-        <div class="acc-actions" onclick="event.stopPropagation()">
-          <button class="acc-ic" onclick="openGEdit('${g.id}')" title="Rediger">✎</button>
-          <button class="acc-ic del" onclick="askDel('G:${g.id}','${esc(g.headline)}')" title="Slet">✕</button>
-        </div>
-        <span class="acc-chevron">${exp ? '▲' : '▼'}</span>
-      </div>
-      ${exp && g.detail ? `<div class="acc-detail"><div class="acc-detail-body">${esc(g.detail)}</div></div>` : ''}`;
-    list.appendChild(card);
+    const adminBtns = isAdmin ? `
+      <div class="pcard-actions">
+        <button onclick="openGEdit('${g.id}')">✎ Rediger</button>
+        <button class="del" onclick="askDel('G:${g.id}','${esc(g.headline).replace(/'/g,"\\'")}')">✕ Slet</button>
+      </div>` : '';
+    html += `
+      <div class="pcard" id="gcard-${g.id}">
+        <span class="num">Princip ${String(i+1).padStart(2,'0')}</span>
+        <h3>${esc(g.headline)}</h3>
+        ${g.short ? `<p>${esc(g.short)}</p>` : ''}
+        ${g.detail ? `<p style="margin-top:8px">${esc(g.detail)}</p>` : ''}
+        ${adminBtns}
+      </div>`;
   });
+  list.innerHTML = html;
 }
 
-// ─── Bias render ─────────────────────────────────────────────────────────────
+// ─── Studio: render Bias-feed ────────────────────────────────────────────
 function renderBias() {
-  const cards = document.getElementById('b-cards');
-  document.getElementById('b-count-lbl').textContent = Bias.length + ' former for bias';
+  const list = document.getElementById('b-list');
+  if (!list) return;
   document.getElementById('tab-b-count').textContent = Bias.length;
+  const lbl = document.getElementById('b-count-lbl');
+  if (lbl) lbl.textContent = Bias.length + ' former for bias';
   const sorted = [...Bias].sort((a, b) => a.order - b.order);
-  cards.innerHTML = '';
+  const isAdmin = (typeof adminMode !== 'undefined' && adminMode);
+  let html = `
+    <div class="introcard">
+      <p>18 mønstre du har, men ikke kan se. Pointen er ikke at eliminere dem — men at gøre dem synlige nok til at de ikke styrer alene.</p>
+      <p class="sig">— Jacob</p>
+    </div>`;
   sorted.forEach((b, i) => {
-    const exp = bExpanded[b.id];
-    const editing = bNoteEditing === b.id;
-    const card = document.createElement('div');
-    card.className = 'acc-card' + (exp ? ' open' : '');
-    card.id = 'bcard-' + b.id;
-    let noteHtml = '';
-    if (exp) {
-      if (editing) {
-        noteHtml = `
-          <textarea class="note-textarea" id="note-ta-${b.id}" rows="3" placeholder="Dine egne erfaringer med denne bias…">${esc(b.note || '')}</textarea>
-          <div class="note-save-row">
-            <button class="note-btn note-btn-primary" onclick="saveNote('${b.id}')">Gem</button>
-            <button class="note-btn note-btn-ghost" onclick="cancelNote()">Annuller</button>
-          </div>`;
-      } else {
-        noteHtml = `
-          ${b.note ? `<div class="note-display">"${esc(b.note)}"</div>` : ''}
-          <button class="note-edit-btn" onclick="startNote('${b.id}','${(b.note||'').replace(/'/g,"\\'")}')">
-            ${b.note ? '✎ Rediger note' : '✎ Tilføj din note'}
-          </button>`;
-      }
-    }
-    card.innerHTML = `
-      <div class="acc-top" onclick="toggleB('${b.id}')">
-        <span class="acc-num">${String(i+1).padStart(2,'0')}</span>
-        <div class="acc-summary">
-          <div class="acc-title">${esc(b.headline)}</div>
-          <div class="acc-short">${esc(b.short)}</div>
+    const noteOpen = bExpanded[b.id];
+    const adminBtns = isAdmin ? `
+      <div class="pcard-actions">
+        <button onclick="openBEdit('${b.id}')">✎ Rediger</button>
+        <button class="del" onclick="askDel('B:${b.id}','${esc(b.headline).replace(/'/g,"\\'")}')">✕ Slet</button>
+      </div>` : '';
+    html += `
+      <div class="pcard" id="bcard-${b.id}">
+        <span class="num">Bias ${String(i+1).padStart(2,'0')}</span>
+        <h3>${esc(b.headline)}</h3>
+        ${b.short ? `<p>${esc(b.short)}</p>` : ''}
+        ${b.detail ? `<p style="margin-top:8px">${esc(b.detail)}</p>` : ''}
+        <div class="biasnote${noteOpen ? ' open' : ''}">
+          <button class="biasnote-toggle" onclick="toggleBiasNote('${b.id}')">✎ ${b.note ? 'Rediger note' : 'Tilføj egne noter'}</button>
+          <textarea id="note-ta-${b.id}" placeholder="Hvor genkender du dig selv her?" onblur="saveBiasNote('${b.id}')">${esc(b.note || '')}</textarea>
         </div>
-        ${b.note ? '<span class="acc-note-dot" title="Du har en note her"></span>' : ''}
-        <div class="acc-actions" onclick="event.stopPropagation()">
-          <button class="acc-ic" onclick="openBEdit('${b.id}')" title="Rediger">✎</button>
-          <button class="acc-ic del" onclick="askDel('B:${b.id}','${esc(b.headline)}')" title="Slet">✕</button>
-        </div>
-        <span class="acc-chevron">${exp ? '▲' : '▼'}</span>
-      </div>
-      ${exp ? `<div class="acc-detail">
-        <div class="acc-detail-body">${esc(b.detail)}</div>
-        ${noteHtml}
-      </div>` : ''}`;
-    cards.appendChild(card);
-    if (editing) {
-      setTimeout(() => {
-        const ta = document.getElementById('note-ta-' + b.id);
-        if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
-      }, 30);
-    }
+        ${adminBtns}
+      </div>`;
   });
+  list.innerHTML = html;
+  // Sørg for at b-cards-container stadig findes (kompatibilitet)
+  if (!document.getElementById('b-cards')) {
+    const compat = document.createElement('div');
+    compat.id = 'b-cards';
+    compat.style.display = 'none';
+    list.appendChild(compat);
+  }
 }
+
+function toggleBiasNote(id) {
+  bExpanded[id] = !bExpanded[id];
+  const card = document.getElementById('bcard-' + id);
+  if (!card) return;
+  const biasnote = card.querySelector('.biasnote');
+  if (biasnote) {
+    biasnote.classList.toggle('open', bExpanded[id]);
+    if (bExpanded[id]) {
+      const ta = card.querySelector('textarea');
+      if (ta) setTimeout(() => ta.focus(), 30);
+    }
+  }
+}
+
+function saveBiasNote(id) {
+  const ta = document.getElementById('note-ta-' + id);
+  if (!ta) return;
+  const b = Bias.find(b => b.id === id);
+  if (!b) return;
+  const v = ta.value.trim();
+  if (b.note !== v) {
+    b.note = v;
+    saveBiasData();
+  }
+}
+
 function toggleG(id) { gExpanded[id] = !gExpanded[id]; renderGuide(); }
 function toggleB(id) { bExpanded[id] = !bExpanded[id]; bNoteEditing = null; renderBias(); }
 function startNote(id, val) { bNoteEditing = id; bExpanded[id] = true; renderBias(); }
@@ -1949,25 +2570,41 @@ function cancelNote() { bNoteEditing = null; renderBias(); }
 function toggleStar(id) {
   const q = Qs.find(q => q.id === id);
   if (!q) return;
-  const wasOff = !q.star;
   q.star = !q.star;
   saveQs();
-  render();
-  // Pulse-animation kun når vi tænder for stjernen (ikke ved fjern)
-  if (wasOff) {
-    const btn = document.querySelector(`.q-card #card-${id} .q-star, [data-id="${id}"] .q-star`);
-    const card = document.getElementById('card-' + id);
-    const star = card ? card.querySelector('.q-star') : null;
-    if (star) {
-      star.classList.add('just-marked');
-      setTimeout(() => star.classList.remove('just-marked'), 350);
-    }
+  // Studio: opdater UI uden full re-render hvis muligt
+  const card = document.getElementById('card-' + id);
+  const star = card ? card.querySelector('.star') : null;
+  if (star) {
+    star.classList.toggle('on', q.star);
+    star.textContent = q.star ? '★' : '☆';
+  }
+  // Re-render hvis vi er i starred-filter (kortet skal måske fjernes)
+  if (filter === 'starred' && !q.star) {
+    render();
+  } else {
+    // Opdater chip-counts og bundbar
+    refreshChipCounts();
+    updateBottomBar();
+    // Trigger cloud sync
+    scheduleSync && scheduleSync();
   }
 }
 function clearStars() {
   Qs.forEach(q => q.star = false);
   if (filter === 'starred') filter = 'all';
   saveQs(); render();
+}
+function refreshChipCounts() {
+  const all = Qs.length;
+  const starred = Qs.filter(q => q.star).length;
+  const byCat = {};
+  CATS.forEach(c => { byCat[c.id] = Qs.filter(q => q.cat === c.id).length; });
+  const elAll = document.getElementById('cnt-all'); if (elAll) elAll.textContent = all;
+  const elStar = document.getElementById('cnt-starred'); if (elStar) elStar.textContent = starred;
+  CATS.forEach(c => {
+    const el = document.getElementById('cnt-' + c.id); if (el) el.textContent = byCat[c.id];
+  });
 }
 function setFilter(f) { filter = f; render(); }
 
@@ -1979,20 +2616,34 @@ function switchTab(tab) {
     if (tabEl) tabEl.classList.toggle('active', t === tab);
     if (secEl) secEl.classList.toggle('active', t === tab);
   });
+  // Studio: opdater hook-tiles og segmented control
+  document.querySelectorAll('.hook').forEach(h => h.classList.toggle('active', h.dataset.go === tab));
+  document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('active', b.dataset.go === tab));
+  // Vis chips kun på Spørgsmål-fanen
+  const chips = document.getElementById('q-chips');
+  if (chips) chips.style.display = (tab === 'q') ? '' : 'none';
+  // Opdater bundbar (vises kun når Spørgsmål + ≥1 markeret)
+  updateBottomBar();
+
   const hdrAdd = document.getElementById('hdr-add');
-  const hdrPdf = document.getElementById('hdr-pdf');
-  if (tab === 'q') {
-    hdrAdd.style.display = ''; hdrAdd.textContent = '+ Nyt spørgsmål'; hdrAdd.onclick = openAdd;
-    hdrPdf.style.display = '';
-  } else if (tab === 'g') {
-    hdrAdd.style.display = ''; hdrAdd.textContent = '+ Nyt princip'; hdrAdd.onclick = openAddGuide;
-    hdrPdf.style.display = 'none';
-  } else {
-    hdrAdd.style.display = ''; hdrAdd.textContent = '+ Ny bias'; hdrAdd.onclick = openAddBias;
-    hdrPdf.style.display = 'none';
+  if (hdrAdd) {
+    if (tab === 'q') { hdrAdd.textContent = '+ Nyt'; hdrAdd.onclick = openAdd; }
+    else if (tab === 'g') { hdrAdd.textContent = '+ Nyt princip'; hdrAdd.onclick = openAddGuide; }
+    else { hdrAdd.textContent = '+ Ny bias'; hdrAdd.onclick = openAddBias; }
   }
   if (tab === 'g') renderGuide();
   if (tab === 'b') renderBias();
+}
+
+// Studio: bundbar-helper (defineres her, bruges også fra toggleStar/clearStars senere)
+function updateBottomBar() {
+  const bar = document.getElementById('bar');
+  if (!bar) return;
+  const activeTab = document.querySelector('.seg button.active')?.dataset.go || 'q';
+  const starredCount = Qs.filter(q => q.star).length;
+  bar.classList.toggle('show', activeTab === 'q' && starredCount > 0);
+  const count = document.getElementById('barcount');
+  if (count) count.textContent = starredCount + ' markeret';
 }
 
 // ─── Q Modal ─────────────────────────────────────────────────────────────────
@@ -2808,6 +3459,60 @@ function closeAboutModal() {
   document.getElementById('om-overlay').classList.remove('on');
 }
 
+// ── PDF settings modal ─────────────────────────────────────────────────────
+const PDF_PREFS_KEY = 'is-pdf-prefs';
+function loadPdfPrefs() {
+  try { return JSON.parse(localStorage.getItem(PDF_PREFS_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function savePdfPrefs(p) {
+  try { localStorage.setItem(PDF_PREFS_KEY, JSON.stringify(p)); } catch(e) {}
+}
+function openPdfModal() {
+  const prefs = loadPdfPrefs();
+  document.getElementById('pdf-name').value  = prefs.name  || '';
+  document.getElementById('pdf-role').value  = prefs.role  || '';
+  document.getElementById('pdf-date').value  = prefs.date  || '';
+  document.getElementById('pdf-iewer').value = prefs.iewer || '';
+  const nl = prefs.nl || 3;
+  document.querySelectorAll('#pdf-nl-row .pdf-nl-btn').forEach(b => {
+    b.classList.toggle('active', Number(b.dataset.n) === Number(nl));
+  });
+  document.getElementById('pdf-overlay').classList.add('on');
+}
+function closePdfModal() {
+  document.getElementById('pdf-overlay').classList.remove('on');
+}
+function setPdfNL(n) {
+  document.querySelectorAll('#pdf-nl-row .pdf-nl-btn').forEach(b => {
+    b.classList.toggle('active', Number(b.dataset.n) === n);
+  });
+}
+function confirmPdfGen() {
+  const prefs = {
+    name:  document.getElementById('pdf-name').value,
+    role:  document.getElementById('pdf-role').value,
+    date:  document.getElementById('pdf-date').value,
+    iewer: document.getElementById('pdf-iewer').value,
+    nl:    Number(document.querySelector('#pdf-nl-row .pdf-nl-btn.active')?.dataset.n || 3)
+  };
+  savePdfPrefs(prefs);
+  // Synk til legacy fields (PDF-rendering læser disse)
+  const evName  = document.getElementById('ev-name');
+  const evRole  = document.getElementById('ev-role');
+  const evDate  = document.getElementById('ev-date');
+  const evIewer = document.getElementById('ev-iewer');
+  if (evName)  evName.value  = prefs.name;
+  if (evRole)  evRole.value  = prefs.role;
+  if (evDate)  evDate.value  = prefs.date;
+  if (evIewer) evIewer.value = prefs.iewer;
+  // Set note-linjer
+  if (typeof setNL === 'function') setNL(prefs.nl);
+  closePdfModal();
+  // Generér PDF-preview
+  if (typeof showPV === 'function') showPV();
+}
+
 function openPublishConfirm() {
   if (!adminMode) return;
   const cur = (masterMeta && masterMeta.version) || 1;
@@ -2919,6 +3624,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     _lastAuthUid = initialUser ? initialUser.uid : null;
 
     render();
+    // Studio: initialisér hook + segmented aktive states + chip visibility
+    switchTab('q');
     // Sørg for at Master-knappen vises hvis brugeren er admin
     updateAdminUI();
     document.getElementById('loading').classList.add('hidden');
@@ -2934,5 +3641,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
+
+<!-- Studio: Bottom slide-up bar -->
+<div class="bottombar" id="bar">
+  <div class="info"><b id="barcount">0 markeret</b><span>Markér spørgsmål du vil bruge</span></div>
+  <button class="pdf" onclick="openPdfModal()">⎙ Download PDF</button>
+</div>
 </body>
 </html>
