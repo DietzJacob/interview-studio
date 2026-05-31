@@ -959,8 +959,15 @@ textarea.finput { resize: vertical; min-height: 80px; line-height: 1.5; }
 .cat-pill:hover { border-color: var(--muted); }
 .cat-pill.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
-/* Skjul "+ Nyt"-knap som default — vises kun i admin-mode */
-body:not(.admin-mode) #hdr-add { display: none !important; }
+/* Skjul "+ Nyt"-knap for anonyme — vises for logged-in og admin */
+body:not(.is-logged-in):not(.admin-mode) #hdr-add { display: none !important; }
+/* +Nyt får accent-styling så folk ser den */
+body.is-logged-in .hdr-btn-add {
+  background: var(--rust); color: #fff; border-color: var(--rust);
+}
+body.is-logged-in .hdr-btn-add:hover {
+  filter: brightness(0.95); background: var(--rust); color: #fff;
+}
 
 /* ── Mobil (≤480px): full width, ingen centerede max-widths ── */
 @media (max-width: 480px) {
@@ -1055,25 +1062,50 @@ body:not(.admin-mode) #hdr-add { display: none !important; }
   border-radius: 12px; padding: 13px 15px;
 }
 
-/* ── Studio: Metode + Bias kort (pcard) ── */
+/* ── Studio: Metode + Bias kort (pcard, klap-ud) ── */
 .pcard {
   background: var(--card); border: 1px solid var(--line);
   border-radius: 16px; padding: 17px;
   margin-bottom: 12px; box-shadow: var(--shadow-card);
+  cursor: pointer; transition: border-color 0.15s;
+}
+.pcard:hover { border-color: var(--rust-soft); }
+.pcard.open { border-color: var(--rust); }
+.pcard-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 4px;
 }
 .pcard .num {
   font-family: var(--font-display); font-style: italic;
   color: var(--rust); font-size: 14px;
 }
+.pcard .chev {
+  color: var(--tile-arrow); font-size: 13px;
+  transition: color 0.15s;
+}
+.pcard:hover .chev { color: var(--muted); }
+.pcard.open .chev { color: var(--rust); }
+.pcard-note-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--rust); margin-left: auto; margin-right: 8px;
+}
 .pcard h3 {
   font-family: var(--font-display); font-weight: 400;
   font-size: 21px; line-height: 1.24;
-  margin: 6px 0 8px; letter-spacing: -0.005em;
+  margin: 4px 0 8px; letter-spacing: -0.005em;
   color: var(--ink);
 }
 .pcard p {
   margin: 0; font-size: 14.5px; line-height: 1.5;
   color: var(--soft);
+}
+.pcard-detail {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+.pcard-detail p {
+  font-family: var(--font-display); font-size: 15px; line-height: 1.6;
+  color: var(--ink);
 }
 .pcard .pcard-actions {
   display: flex; gap: 6px; margin-top: 10px;
@@ -2466,21 +2498,37 @@ function renderGuide() {
       <p class="sig">— Jacob</p>
     </div>`;
   sorted.forEach((g, i) => {
+    const exp = gExpanded[g.id];
     const adminBtns = isAdmin ? `
-      <div class="pcard-actions">
+      <div class="pcard-actions" onclick="event.stopPropagation()">
         <button onclick="openGEdit('${g.id}')">✎ Rediger</button>
         <button class="del" onclick="askDel('G:${g.id}','${esc(g.headline).replace(/'/g,"\\'")}')">✕ Slet</button>
       </div>` : '';
     html += `
-      <div class="pcard" id="gcard-${g.id}">
-        <span class="num">Princip ${String(i+1).padStart(2,'0')}</span>
+      <div class="pcard${exp ? ' open' : ''}" id="gcard-${g.id}" data-toggle="g" data-id="${g.id}">
+        <div class="pcard-head">
+          <span class="num">Princip ${String(i+1).padStart(2,'0')}</span>
+          <span class="chev">${exp ? '▴' : '▾'}</span>
+        </div>
         <h3>${esc(g.headline)}</h3>
         ${g.short ? `<p>${esc(g.short)}</p>` : ''}
-        ${g.detail ? `<p style="margin-top:8px">${esc(g.detail)}</p>` : ''}
+        ${exp && g.detail ? `<div class="pcard-detail"><p>${esc(g.detail)}</p></div>` : ''}
         ${adminBtns}
       </div>`;
   });
   list.innerHTML = html;
+  list.onclick = handlePcardClick;
+}
+
+function handlePcardClick(e) {
+  // Stop hvis vi klikkede på interne interactive (admin-knapper, textarea, biasnote)
+  if (e.target.closest('.pcard-actions, .biasnote, textarea, button:not(.pcard)')) return;
+  const card = e.target.closest('[data-toggle]');
+  if (!card) return;
+  const id = card.dataset.id;
+  const type = card.dataset.toggle;
+  if (type === 'g') { gExpanded[id] = !gExpanded[id]; renderGuide(); }
+  else if (type === 'b') { bExpanded[id] = !bExpanded[id]; renderBias(); }
 }
 
 // ─── Studio: render Bias-feed ────────────────────────────────────────────
@@ -2498,26 +2546,32 @@ function renderBias() {
       <p class="sig">— Jacob</p>
     </div>`;
   sorted.forEach((b, i) => {
-    const noteOpen = bExpanded[b.id];
+    const exp = bExpanded[b.id];
     const adminBtns = isAdmin ? `
-      <div class="pcard-actions">
+      <div class="pcard-actions" onclick="event.stopPropagation()">
         <button onclick="openBEdit('${b.id}')">✎ Rediger</button>
         <button class="del" onclick="askDel('B:${b.id}','${esc(b.headline).replace(/'/g,"\\'")}')">✕ Slet</button>
       </div>` : '';
+    const noteSection = exp ? `
+      <div class="biasnote open" onclick="event.stopPropagation()">
+        <textarea id="note-ta-${b.id}" placeholder="Hvor genkender du dig selv her?" onblur="saveBiasNote('${b.id}')">${esc(b.note || '')}</textarea>
+      </div>` : '';
     html += `
-      <div class="pcard" id="bcard-${b.id}">
-        <span class="num">Bias ${String(i+1).padStart(2,'0')}</span>
+      <div class="pcard${exp ? ' open' : ''}" id="bcard-${b.id}" data-toggle="b" data-id="${b.id}">
+        <div class="pcard-head">
+          <span class="num">Bias ${String(i+1).padStart(2,'0')}</span>
+          ${b.note ? '<span class="pcard-note-dot" title="Du har en note her"></span>' : ''}
+          <span class="chev">${exp ? '▴' : '▾'}</span>
+        </div>
         <h3>${esc(b.headline)}</h3>
         ${b.short ? `<p>${esc(b.short)}</p>` : ''}
-        ${b.detail ? `<p style="margin-top:8px">${esc(b.detail)}</p>` : ''}
-        <div class="biasnote${noteOpen ? ' open' : ''}">
-          <button class="biasnote-toggle" onclick="toggleBiasNote('${b.id}')">✎ ${b.note ? 'Rediger note' : 'Tilføj egne noter'}</button>
-          <textarea id="note-ta-${b.id}" placeholder="Hvor genkender du dig selv her?" onblur="saveBiasNote('${b.id}')">${esc(b.note || '')}</textarea>
-        </div>
+        ${exp && b.detail ? `<div class="pcard-detail"><p>${esc(b.detail)}</p></div>` : ''}
+        ${noteSection}
         ${adminBtns}
       </div>`;
   });
   list.innerHTML = html;
+  list.onclick = handlePcardClick;
   // Sørg for at b-cards-container stadig findes (kompatibilitet)
   if (!document.getElementById('b-cards')) {
     const compat = document.createElement('div');
@@ -2528,17 +2582,10 @@ function renderBias() {
 }
 
 function toggleBiasNote(id) {
+  // Bevaret som legacy fallback — den nye Studio version viser textarea
+  // direkte når kortet er foldet ud, så denne funktion kalder bare ind på toggle.
   bExpanded[id] = !bExpanded[id];
-  const card = document.getElementById('bcard-' + id);
-  if (!card) return;
-  const biasnote = card.querySelector('.biasnote');
-  if (biasnote) {
-    biasnote.classList.toggle('open', bExpanded[id]);
-    if (bExpanded[id]) {
-      const ta = card.querySelector('textarea');
-      if (ta) setTimeout(() => ta.focus(), 30);
-    }
-  }
+  renderBias();
 }
 
 function saveBiasNote(id) {
@@ -3020,6 +3067,8 @@ function updateAuthUI(user) {
     btn.textContent = 'Log ind';
     btn.title = 'Log ind eller opret konto';
   }
+  // Studio: toggle body.is-logged-in så +Nyt-knap kan vises
+  document.body.classList.toggle('is-logged-in', !!user);
 }
 
 // ─── Admin mode ──────────────────────────────────────────────────────────────
