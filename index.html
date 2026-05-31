@@ -752,6 +752,8 @@ textarea.finput { resize: vertical; line-height: 1.65; }
 .body-wrap { display: block; flex: none; overflow: visible; height: auto; }
 .section { overflow: visible; height: auto; flex: none; display: none; padding: 0 24px 24px; }
 .section.active { display: block; }
+/* Sec-q har bottombar der kan slide op — sørg for sidste kort er synligt */
+#sec-q { padding-bottom: 120px; }
 .q-stereo { display: block; overflow: visible; height: auto; }
 .q-center { display: block; overflow: visible; height: auto; }
 .q-main { padding: 0; overflow: visible; max-width: none; }
@@ -807,11 +809,23 @@ textarea.finput { resize: vertical; line-height: 1.65; }
 #loading {
   position: fixed; inset: 0; background: var(--paper);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 1000; gap: 8px;
+  z-index: 1000; gap: 10px;
 }
 #loading.hidden { display: none; }
-.loading-title { font-family: var(--font-display); font-size: 22px; color: var(--ink); }
-.loading-sub { font-size: 13px; color: var(--muted); }
+.loading-title {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 28px; color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.loading-sub {
+  font-size: 13px; color: var(--muted);
+  font-family: var(--font-ui);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.loading-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--rust); animation: pulse 1.2s ease-in-out infinite;
+}
 
 /* ── Banners (admin, update) — Studio look ── */
 #admin-banner, #update-banner {
@@ -961,12 +975,14 @@ textarea.finput { resize: vertical; min-height: 80px; line-height: 1.5; }
 
 /* Skjul "+ Nyt"-knap for anonyme — vises for logged-in og admin */
 body:not(.is-logged-in):not(.admin-mode) #hdr-add { display: none !important; }
-/* +Nyt får accent-styling så folk ser den */
-body.is-logged-in .hdr-btn-add {
-  background: var(--rust); color: #fff; border-color: var(--rust);
+/* +Nyt får ink solid styling så den fremstår som primary action */
+.topbar-actions .hdr-btn-add {
+  background: var(--ink); color: var(--paper); border-color: var(--ink);
+  font-weight: 600;
 }
-body.is-logged-in .hdr-btn-add:hover {
-  filter: brightness(0.95); background: var(--rust); color: #fff;
+.topbar-actions .hdr-btn-add:hover {
+  background: #000; color: var(--paper); border-color: #000;
+  filter: none;
 }
 
 /* ── Mobil (≤480px): full width, ingen centerede max-widths ── */
@@ -1029,11 +1045,20 @@ body.is-logged-in .hdr-btn-add:hover {
 
 .qcard .star {
   background: none; border: 0; cursor: pointer;
-  font-size: 20px; line-height: 1; color: var(--star-off);
-  padding: 0; transition: transform .12s, color .12s;
+  font-size: 22px; line-height: 1; color: var(--star-off);
+  padding: 2px 4px;
+  transition: transform .12s, color .12s;
 }
+.qcard .star:hover { color: var(--rust); transform: scale(1.08); }
 .qcard .star:active { transform: scale(1.25); }
 .qcard .star.on { color: var(--rust); }
+@keyframes star-pop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.5); }
+  60%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.qcard .star.just-marked { animation: star-pop 0.38s ease-out; }
 
 .qcard h3 {
   font-family: var(--font-display); font-weight: 400;
@@ -1106,6 +1131,30 @@ body.is-logged-in .hdr-btn-add:hover {
 .pcard-detail p {
   font-family: var(--font-display); font-size: 15px; line-height: 1.6;
   color: var(--ink);
+}
+
+/* Eksplicit klap-ud-toggle på pcard (matcher .qcard .listen .toggle) */
+.pcard-more {
+  font: inherit; background: none; border: 0; padding: 0;
+  cursor: pointer; margin-top: 10px;
+  font-family: var(--font-ui);
+  font-size: 13.5px; font-weight: 600; color: var(--rust);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.pcard-more .pl {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--rust-soft); color: var(--rust);
+  font-size: 12px; line-height: 1; transition: transform .2s;
+}
+.pcard-more.open .pl { transform: rotate(45deg); }
+.pcard-more:hover .pl { background: var(--rust); color: #fff; }
+
+/* Bias-noter — tydelig label */
+.biasnote-label {
+  display: block; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
 }
 .pcard .pcard-actions {
   display: flex; gap: 6px; margin-top: 10px;
@@ -2504,14 +2553,18 @@ function renderGuide() {
         <button onclick="openGEdit('${g.id}')">✎ Rediger</button>
         <button class="del" onclick="askDel('G:${g.id}','${esc(g.headline).replace(/'/g,"\\'")}')">✕ Slet</button>
       </div>` : '';
+    const moreToggle = g.detail ? `
+      <button class="pcard-more${exp ? ' open' : ''}" tabindex="-1">
+        <span class="pl">${exp ? '×' : '+'}</span> ${exp ? 'Luk' : 'Læs hele princippet'}
+      </button>` : '';
     html += `
       <div class="pcard${exp ? ' open' : ''}" id="gcard-${g.id}" data-toggle="g" data-id="${g.id}">
         <div class="pcard-head">
           <span class="num">Princip ${String(i+1).padStart(2,'0')}</span>
-          <span class="chev">${exp ? '▴' : '▾'}</span>
         </div>
         <h3>${esc(g.headline)}</h3>
         ${g.short ? `<p>${esc(g.short)}</p>` : ''}
+        ${moreToggle}
         ${exp && g.detail ? `<div class="pcard-detail"><p>${esc(g.detail)}</p></div>` : ''}
         ${adminBtns}
       </div>`;
@@ -2552,8 +2605,13 @@ function renderBias() {
         <button onclick="openBEdit('${b.id}')">✎ Rediger</button>
         <button class="del" onclick="askDel('B:${b.id}','${esc(b.headline).replace(/'/g,"\\'")}')">✕ Slet</button>
       </div>` : '';
+    const moreToggle = b.detail ? `
+      <button class="pcard-more${exp ? ' open' : ''}" tabindex="-1">
+        <span class="pl">${exp ? '×' : '+'}</span> ${exp ? 'Luk' : 'Læs hele bias-mønstret'}
+      </button>` : '';
     const noteSection = exp ? `
       <div class="biasnote open" onclick="event.stopPropagation()">
+        <label class="biasnote-label">Mine noter</label>
         <textarea id="note-ta-${b.id}" placeholder="Hvor genkender du dig selv her?" onblur="saveBiasNote('${b.id}')">${esc(b.note || '')}</textarea>
       </div>` : '';
     html += `
@@ -2561,10 +2619,10 @@ function renderBias() {
         <div class="pcard-head">
           <span class="num">Bias ${String(i+1).padStart(2,'0')}</span>
           ${b.note ? '<span class="pcard-note-dot" title="Du har en note her"></span>' : ''}
-          <span class="chev">${exp ? '▴' : '▾'}</span>
         </div>
         <h3>${esc(b.headline)}</h3>
         ${b.short ? `<p>${esc(b.short)}</p>` : ''}
+        ${moreToggle}
         ${exp && b.detail ? `<div class="pcard-detail"><p>${esc(b.detail)}</p></div>` : ''}
         ${noteSection}
         ${adminBtns}
@@ -2617,6 +2675,7 @@ function cancelNote() { bNoteEditing = null; renderBias(); }
 function toggleStar(id) {
   const q = Qs.find(q => q.id === id);
   if (!q) return;
+  const wasOff = !q.star;
   q.star = !q.star;
   saveQs();
   // Studio: opdater UI uden full re-render hvis muligt
@@ -2625,6 +2684,13 @@ function toggleStar(id) {
   if (star) {
     star.classList.toggle('on', q.star);
     star.textContent = q.star ? '★' : '☆';
+    // Pulse-animation kun når vi tænder for stjernen
+    if (wasOff) {
+      star.classList.remove('just-marked');
+      void star.offsetWidth; // tving reflow så animation kan trigge igen
+      star.classList.add('just-marked');
+      setTimeout(() => star.classList.remove('just-marked'), 380);
+    }
   }
   // Re-render hvis vi er i starred-filter (kortet skal måske fjernes)
   if (filter === 'starred' && !q.star) {
@@ -2674,9 +2740,9 @@ function switchTab(tab) {
 
   const hdrAdd = document.getElementById('hdr-add');
   if (hdrAdd) {
-    if (tab === 'q') { hdrAdd.textContent = '+ Nyt'; hdrAdd.onclick = openAdd; }
-    else if (tab === 'g') { hdrAdd.textContent = '+ Nyt princip'; hdrAdd.onclick = openAddGuide; }
-    else { hdrAdd.textContent = '+ Ny bias'; hdrAdd.onclick = openAddBias; }
+    if (tab === 'q')      { hdrAdd.textContent = '+ Spørgsmål'; hdrAdd.onclick = openAdd; }
+    else if (tab === 'g') { hdrAdd.textContent = '+ Princip';   hdrAdd.onclick = openAddGuide; }
+    else                  { hdrAdd.textContent = '+ Bias';      hdrAdd.onclick = openAddBias; }
   }
   if (tab === 'g') renderGuide();
   if (tab === 'b') renderBias();
