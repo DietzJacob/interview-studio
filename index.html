@@ -696,7 +696,7 @@ body.pv-mode { background: var(--paper); }
 .triad span:last-child { color: var(--rust); }
 .hero p {
   margin: 0; font-size: 16px; line-height: 1.5;
-  color: var(--soft); max-width: 33ch;
+  color: var(--soft);
 }
 
 /* ── Hook tiles ── */
@@ -985,17 +985,77 @@ textarea.finput { resize: vertical; min-height: 80px; line-height: 1.5; }
 }
 .modal-prose-help a:hover { border-bottom-color: var(--rust); }
 
-/* Category grid (i edit-modal) */
+/* Category grid (i edit-modal) — gælder både .cat-pill og .cat-opt */
 .cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 14px; }
-.cat-pill {
-  padding: 8px 12px; border-radius: 8px;
+.cat-pill, .cat-opt {
+  padding: 9px 12px; border-radius: 10px;
   border: 1px solid var(--line); background: #fff;
-  font: inherit; font-size: 13px; cursor: pointer;
+  font: inherit; font-family: var(--font-ui);
+  font-size: 13px; cursor: pointer;
   color: var(--ink); text-align: left;
   transition: all 0.15s;
 }
-.cat-pill:hover { border-color: var(--muted); }
-.cat-pill.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.cat-pill:hover, .cat-opt:hover { border-color: var(--rust); color: var(--rust); }
+.cat-pill.on, .cat-opt.sel {
+  background: var(--rust-soft); color: var(--rust); border-color: var(--rust);
+  font-weight: 600;
+}
+
+/* Modal width override — Studio default 460px, max 92vw */
+.modal { width: 460px; max-width: 92vw; }
+
+/* Btn-danger til delete — distinkt rust med hvid tekst */
+.btn-danger {
+  background: var(--rust); color: #fff; border-color: var(--rust);
+  font-weight: 600;
+}
+.btn-danger:hover { filter: brightness(0.92); background: var(--rust); color: #fff; }
+
+/* Delete-modal — Studio look */
+.del-overlay { background: rgba(33,31,29,0.42); padding: 16px; }
+.del-box {
+  background: var(--card); border-radius: 16px;
+  padding: 22px 24px; max-width: 400px; width: 100%;
+  box-shadow: 0 20px 60px -10px rgba(33,31,29,0.25);
+  border: 1px solid var(--line);
+}
+.del-box h3 {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 19px; margin: 0 0 8px; color: var(--ink);
+}
+.del-box p {
+  font-size: 14px; color: var(--soft);
+  line-height: 1.5; margin: 0 0 18px;
+}
+
+/* Auth modal — Studio styling */
+#auth-overlay .modal { width: 420px; max-width: 92vw; }
+#auth-intro {
+  font-size: 13px !important; color: var(--soft) !important;
+  line-height: 1.55 !important; margin-bottom: 16px !important;
+}
+#auth-error {
+  font-size: 12.5px !important;
+  color: var(--rust) !important;
+  margin-bottom: 12px !important;
+  padding: 10px 12px !important;
+  background: var(--rust-soft) !important;
+  border-radius: 10px !important;
+  line-height: 1.5 !important;
+  border: 1px solid var(--rust-soft) !important;
+}
+
+/* PDF preview ctrl bar — Studio look */
+.pv-ctrl .btn-primary {
+  background: var(--rust); color: #fff; border-color: var(--rust);
+  font-weight: 600;
+}
+.pv-ctrl .btn-primary:hover { filter: brightness(0.95); background: var(--rust); color: #fff; }
+.pv-ctrl .btn-secondary {
+  background: #fff; color: var(--muted);
+  border: 1px solid var(--line);
+}
+.pv-ctrl .btn-secondary:hover { color: var(--ink); border-color: var(--muted); background: #fff; }
 
 /* Skjul "+ Nyt"-knap for anonyme — vises for logged-in og admin */
 body:not(.is-logged-in):not(.admin-mode) #hdr-add { display: none !important; }
@@ -2793,9 +2853,7 @@ function updateBottomBar() {
 // ─── Q Modal ─────────────────────────────────────────────────────────────────
 function buildCatGrid() {
   document.getElementById('cat-grid').innerHTML = CATS.map(c => `
-    <button class="cat-opt${selCat === c.id ? ' sel' : ''}"
-      style="${selCat === c.id ? `border-color:var(--cat-${c.id}-ink);background:var(--cat-${c.id}-bg);color:var(--cat-${c.id}-ink)` : ''}"
-      onclick="pickCat('${c.id}')">${c.label}</button>`).join('');
+    <button class="cat-opt${selCat === c.id ? ' sel' : ''}" onclick="pickCat('${c.id}')">${c.label}</button>`).join('');
 }
 function pickCat(id) { selCat = id; buildCatGrid(); }
 function openAdd() {
